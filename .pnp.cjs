@@ -30,6 +30,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["@vitejs/plugin-vue", "virtual:ad05b60a38444eb6b7e007d7feb4f840a26b0befc328377651a8a57e0300b176582334b580c8dd6044624e774bb6767f9eac15a146211b444ab83a669bb8d55b#npm:3.2.0"],\
             ["axios", "npm:1.2.1"],\
+            ["jwt-decode", "npm:3.1.2"],\
+            ["mitt", "npm:3.0.0"],\
             ["typescript", "patch:typescript@npm%3A4.9.3#~builtin<compat/typescript>::version=4.9.3&hash=d73830"],\
             ["vite", "virtual:ad05b60a38444eb6b7e007d7feb4f840a26b0befc328377651a8a57e0300b176582334b580c8dd6044624e774bb6767f9eac15a146211b444ab83a669bb8d55b#npm:3.2.4"],\
             ["vue", "npm:3.2.45"],\
@@ -453,6 +455,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["auth-service-front", "workspace:."],\
             ["@vitejs/plugin-vue", "virtual:ad05b60a38444eb6b7e007d7feb4f840a26b0befc328377651a8a57e0300b176582334b580c8dd6044624e774bb6767f9eac15a146211b444ab83a669bb8d55b#npm:3.2.0"],\
             ["axios", "npm:1.2.1"],\
+            ["jwt-decode", "npm:3.1.2"],\
+            ["mitt", "npm:3.0.0"],\
             ["typescript", "patch:typescript@npm%3A4.9.3#~builtin<compat/typescript>::version=4.9.3&hash=d73830"],\
             ["vite", "virtual:ad05b60a38444eb6b7e007d7feb4f840a26b0befc328377651a8a57e0300b176582334b580c8dd6044624e774bb6767f9eac15a146211b444ab83a669bb8d55b#npm:3.2.4"],\
             ["vue", "npm:3.2.45"],\
@@ -1207,6 +1211,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["jwt-decode", [\
+        ["npm:3.1.2", {\
+          "packageLocation": "./.yarn/cache/jwt-decode-npm-3.1.2-bf3ab26591-20a4b072d4.zip/node_modules/jwt-decode/",\
+          "packageDependencies": [\
+            ["jwt-decode", "npm:3.1.2"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["lru-cache", [\
         ["npm:6.0.0", {\
           "packageLocation": "./.yarn/cache/lru-cache-npm-6.0.0-b4c8668fe1-f97f499f89.zip/node_modules/lru-cache/",\
@@ -1366,6 +1379,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["minizlib", "npm:2.1.2"],\
             ["minipass", "npm:3.3.6"],\
             ["yallist", "npm:4.0.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["mitt", [\
+        ["npm:3.0.0", {\
+          "packageLocation": "./.yarn/cache/mitt-npm-3.0.0-ea651563b7-f7be5049d2.zip/node_modules/mitt/",\
+          "packageDependencies": [\
+            ["mitt", "npm:3.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\

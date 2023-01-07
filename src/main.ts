@@ -1,16 +1,15 @@
 import { createApp } from 'vue'
-import './style.css'
 import App from './App.vue'
 import router from './router'
+import './style.css'
 import AuthRequest from './common/auth-request'
-import AuthToken from './common/auth-token'
+import { createAuthTokenInstance } from './common/auth-token'
+
+
+const authToken = createAuthTokenInstance("http://localhost:8091")
 
 createApp(App)
     .use(router)
-    .provide(
-        "http",
-        new AuthRequest(
-            new AuthToken("http://localhost:8091")
-        )
-    )
+    .provide("authToken", authToken)
+    .provide("http",      new AuthRequest(authToken))
     .mount('#app')

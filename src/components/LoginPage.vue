@@ -1,15 +1,18 @@
 <script setup lang="ts">
     import { ref, inject } from 'vue'
     import axios from 'axios';
+    import router from '../router'
+    import eventBus from '../common/event-bus'
+
+    const http = inject("http")
+    const authToken = inject("authToken")
 
     const email = ref("")
     const password = ref("")
 
-    const token = ref(localStorage.getItem("token"))
-    const http = inject("http")
-
-    async function loginRequest() {
-        this.http.createToken(this.email, this.password)
+    function loginRequest() {
+        this.authToken.createNewJwtTokenByCredentials(this.email, this.password)
+            .then((response: any) => eventBus.emit("loginSuccessEvent"))
     }
 
     // axios.interceptors.request.use(

@@ -1,5 +1,5 @@
 import axios, {AxiosError} from 'axios'
-import AuthToken from './auth-token'
+import { AuthToken } from './auth-token'
 
 
 type ErrorResponse = {
@@ -18,43 +18,45 @@ class AuthRequest {
         this.authToken = authToken
     }
 
-    get<ResponseType>(url: string) {
-        return this.httpRequest("GET", url)
+    get<ResponseType>(url: string): ResponseType {
+        return this.httpRequest<ResponseType>(() => this.directHttpRequest("GET", url))
     }
 
-    httpRequest<ResponseType>(method: string, url: string): ResponseType {
+    logout(): Promise<void> {
+        return this.httpRequest<Promise<void>>(() => this.authToken.revoke())
+    }
+
+    httpRequest<ResponseType>(requestFunction: () => ResponseType): ResponseType {
         try {
-            return this.httpRequestTry(method, url)
+            return this.httpRequestTry<ResponseType>(requestFunction)
         } catch (error: any) {
             if (error instanceof UnauthenticatedError) {
                 console.log("Try to refresh token")
                 this.authToken.refreshJwtToken()
                 console.log("Re-sending the request")
-                return this.httpRequestTry(method, url)
+                return this.httpRequestTry<ResponseType>(requestFunction)
             }
-            throw new Error(`${method} ${url} error: ${this.errorResponseMessage(error)}`)
         }
     }
 
-    createToken(email: string, password: string): void {
-        this.authToken.createNewJwtTokenByCredentials(email, password)
-    }
-
-    private httpRequestTry<ResponseType>(method: string, url: string): ResponseType {
+    private httpRequestTry<ResponseType>(requestFunction: () => ResponseType): ResponseType {
         try {
-            return axios<ResponseType>({
-                method: method,
-                url: url,
-                headers: this.authToken.header()
-            })
-
+            return requestFunction()
         } catch (error: any) {
-            if (this.errorResponseCode(error) == 401) {
+            if (this.errorResponseCode(error) == 401 || this.errorResponseCode(error) == 403) {
                 throw new UnauthenticatedError()
             } else {
-                throw new Error(`${method} ${url} error: ${this.errorResponseMessage(error)}`)
+                throw new Error(`Request error: ${this.errorResponseMessage(error)}`)
             }
         }
+    }
+
+    private directHttpRequest<ResponseType>(method: string, url: string): ResponseType {
+        return axios<ResponseType>({
+            method: method,
+            url: url,
+            headers: this.authToken.header()
+        })
     }
 
     private errorResponseMessage(error: any): string {
