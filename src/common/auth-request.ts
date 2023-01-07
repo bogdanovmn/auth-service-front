@@ -18,40 +18,40 @@ class AuthRequest {
         this.authToken = authToken
     }
 
-    get<ResponseType>(url: string): ResponseType {
-        return this.httpRequest<ResponseType>(() => this.directHttpRequest("GET", url))
+    get<ResponseType>(url: string): Promise<ResponseType> {
+        return this.httpRequest<ResponseType>(() => this.directHttpRequest<ResponseType>("GET", url))
     }
 
     logout(): Promise<void> {
-        return this.httpRequest<Promise<void>>(() => this.authToken.revoke())
+        return this.httpRequest<void>(() => this.authToken.revoke())
     }
 
-    httpRequest<ResponseType>(requestFunction: () => ResponseType): ResponseType {
-        try {
-            return this.httpRequestTry<ResponseType>(requestFunction)
-        } catch (error: any) {
-            if (error instanceof UnauthenticatedError) {
-                console.log("Try to refresh token")
-                this.authToken.refreshJwtToken()
-                console.log("Re-sending the request")
-                return this.httpRequestTry<ResponseType>(requestFunction)
-            }
-        }
+    httpRequest<ResponseType>(requestFunction: () => Promise<ResponseType>): Promise<ResponseType> {
+        return this.httpRequestTry<ResponseType>(requestFunction)
+            .catch((error: any) => {
+                if (error instanceof UnauthenticatedError) {
+                    console.log("Try to refresh token")
+                    this.authToken.refreshJwtToken()
+                    console.log("Re-sending the request")
+                    return this.httpRequestTry<ResponseType>(requestFunction)
+                } else {
+                    throw error
+                }
+            })
     }
 
-    private httpRequestTry<ResponseType>(requestFunction: () => ResponseType): ResponseType {
-        try {
-            return requestFunction()
-        } catch (error: any) {
-            if (this.errorResponseCode(error) == 401 || this.errorResponseCode(error) == 403) {
-                throw new UnauthenticatedError()
-            } else {
-                throw new Error(`Request error: ${this.errorResponseMessage(error)}`)
-            }
-        }
+    private httpRequestTry<ResponseType>(requestFunction: () => Promise<ResponseType>): Promise<ResponseType> {
+        return requestFunction()
+            .catch((error: any) => {
+                if (this.errorResponseCode(error) == 401 || this.errorResponseCode(error) == 403) {
+                    throw new UnauthenticatedError()
+                } else {
+                    throw new Error(`Request error: ${this.errorResponseMessage(error)}`)
+                }
+            })
     }
 
-    private directHttpRequest<ResponseType>(method: string, url: string): ResponseType {
+    private directHttpRequest<ResponseType>(method: string, url: string): Promise<ResponseType> {
         return axios<ResponseType>({
             method: method,
             url: url,
@@ -70,7 +70,7 @@ class AuthRequest {
     private errorResponseCode(error: any): number {
         let code = 0
         if (axios.isAxiosError(error)) {
-            code = error.response.code
+            code = error.response.status
         }
         return code
     }

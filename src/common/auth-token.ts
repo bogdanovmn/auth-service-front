@@ -41,10 +41,7 @@ export class AuthToken {
             this.authServiceUrl + "/jwt",
             { email: email, password: password }
         ).then((response: any) => {
-            this.token = response.data.token;
-            this.refreshToken = response.data.refreshToken;
-            localStorage.setItem("token", this.token!)
-            localStorage.setItem("refreshToken", this.refreshToken!)
+            this.updateTokens(response.data)
             console.log("Token creating success")
         }).catch((error: any) => {
             console.log(`Can't get JWT using email "${email}"`)
@@ -56,12 +53,9 @@ export class AuthToken {
     public refreshJwtToken(): void {
         axios.put(
             this.authServiceUrl + "/jwt",
-            { refreshToken: this.refreshJwtToken }
+            { refreshToken: this.refreshToken }
         ).then((response: any) => {
-            this.token = response.data.token;
-            this.refreshToken = response.data.refreshToken;
-            localStorage.setItem("token", this.token!)
-            localStorage.setItem("refreshToken", this.refreshToken!)
+            this.updateTokens(response.data)
             console.log("Token refreshing success")
         }).catch((error: any) => {
             console.log(`Can't get JWT using refreshToken`)
@@ -85,6 +79,13 @@ export class AuthToken {
             console.log(error.response.data)
             throw (error)
         })
+    }
+
+    private updateTokens(data: any): void {
+        this.token = data.token;
+        this.refreshToken = data.refreshToken;
+        localStorage.setItem("token", this.token!)
+        localStorage.setItem("refreshToken", this.refreshToken!)
     }
 }
 
