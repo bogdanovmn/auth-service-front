@@ -11,5 +11,14 @@ const authToken = createAuthTokenInstance("http://localhost:8091")
 createApp(App)
     .use(router)
     .provide("authToken", authToken)
-    .provide("http",      new AuthRequest(authToken))
+    .provide(
+        "http",
+        new AuthRequest(
+            authToken,
+            () => {
+                console.log("auto logout...");
+                router.push("/logout")
+            }
+        )
+    )
     .mount('#app')

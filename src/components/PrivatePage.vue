@@ -6,30 +6,12 @@
 
     const data = ref({})
 
-
-    class Application {
-        id: number
-        name: string
-        roles: List<ApplicationRole>
-    }
-
-    class ApplicationRole {
-        name: string
-        userCounts: number
-    }
-
-
     function loadApplications() {
-        return http.get<List<Application>>("http://localhost:8091/applications")
+        return http.get("http://localhost:8091/applications")
             .then(resp => data.value = resp.data)
     }
 
-     async function loadApplications1() {
-        const { apps } = await http.get < List < Application >> ("http://localhost:8091/applications")
-        console.log(apps[0])
-    }
-
-    loadApplications()
+    data.value = loadApplications()
 
 </script>
 

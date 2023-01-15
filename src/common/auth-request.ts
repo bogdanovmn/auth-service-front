@@ -13,9 +13,11 @@ class UnauthenticatedError extends Error {
 
 class AuthRequest {
     private authToken: AuthToken;
+    private onFailAction: Function;
 
-    constructor(authToken: AuthToken) {
+    constructor(authToken: AuthToken, onFailFunction: Function = () => {}) {
         this.authToken = authToken
+        this.onFailAction = onFailFunction;
     }
 
     get<ResponseType>(url: string): Promise<ResponseType> {
@@ -34,6 +36,13 @@ class AuthRequest {
                     this.authToken.refreshJwtToken()
                     console.log("Re-sending the request")
                     return this.httpRequestTry<ResponseType>(requestFunction)
+                        .catch((error: any) => {
+                            console.log(this.onFailAction)
+                            if (this.onFailAction) {
+                                this.onFailAction()
+                            }
+                            throw error
+                        })
                 } else {
                     throw error
                 }

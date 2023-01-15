@@ -69,15 +69,16 @@ export class AuthToken {
             this.authServiceUrl + "/jwt",
             { headers: this.header() }
         ).then((response: any) => {
-            this.token = undefined
-            this.refreshToken = undefined
-            localStorage.removeItem("token")
-            localStorage.removeItem("refreshToken")
             console.log("Token revoked success")
         }).catch((error: any) => {
             console.log(`Can't revoke refresh token`)
             console.log(error.response.data)
             throw (error)
+        }).finally(() => {
+            this.token = undefined
+            this.refreshToken = undefined
+            localStorage.removeItem("token")
+            localStorage.removeItem("refreshToken")
         })
     }
 
