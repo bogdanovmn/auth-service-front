@@ -1,10 +1,6 @@
 import axios from 'axios'
 import jwt_decode from "jwt-decode";
 
-type JwtResponse = {
-    token: string
-    refreshToken: string
-}
 
 export class AuthToken {
     private authServiceUrl: string
@@ -36,8 +32,8 @@ export class AuthToken {
         return this.token != null
     }
 
-    public createNewJwtTokenByCredentials(email: string, password: string): Promise<void> {
-        return axios.post<JwtResponse>(
+    public async createNewJwtTokenByCredentials(email: string, password: string): Promise<void> {
+        return axios.post(
             this.authServiceUrl + "/jwt",
             { email: email, password: password }
         ).then((response: any) => {
@@ -50,8 +46,8 @@ export class AuthToken {
         })
     }
 
-    public refreshJwtToken(): void {
-        axios.put(
+    public async refreshJwtToken(): Promise<void> {
+        return axios.put(
             this.authServiceUrl + "/jwt",
             { refreshToken: this.refreshToken }
         ).then((response: any) => {
@@ -64,7 +60,7 @@ export class AuthToken {
         })
     }
 
-    public revoke(): Promise<void> {
+    public async revoke(): Promise<void> {
         return axios.delete(
             this.authServiceUrl + "/jwt",
             { headers: this.header() }
