@@ -33,7 +33,7 @@ class AuthRequest {
             .catch(async (error: any) => {
                 if (error instanceof UnauthenticatedError) {
                     console.log("Try to refresh token")
-                    await this.authToken.refreshJwtToken()
+                    return await this.authToken.refreshJwtToken()
                         .then((response: any) => {
                             console.log("Re-sending the request")
                             return this.httpRequestTry<ResponseType>(requestFunction)
