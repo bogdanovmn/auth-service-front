@@ -63,17 +63,18 @@ class AuthRequest {
     }
 
     private async directHttpRequest<ResponseType>(method: string, url: string): Promise<ResponseType> {
-        return axios<ResponseType>({
+        let resp = axios<ResponseType>({
             method: method,
             url: url,
             headers: this.authToken.header()
         })
+        return (await resp).data
     }
 
     private errorResponseMessage(error: any): string {
         let errorMsg = 'An unexpected error occurred'
         if (axios.isAxiosError(error)) {
-            errorMsg = error.response.data
+            errorMsg = error.response!.data
         }
         return errorMsg
     }
@@ -81,7 +82,7 @@ class AuthRequest {
     private errorResponseCode(error: any): number {
         let code = 0
         if (axios.isAxiosError(error)) {
-            code = error.response.status
+            code = error.response!.status
         }
         return code
     }

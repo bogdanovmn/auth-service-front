@@ -3,15 +3,16 @@
     import axios from 'axios';
     import router from '../router'
     import eventBus from '../common/event-bus'
+import { AuthToken } from '../common/auth-token';
 
     const http = inject("http")
-    const authToken = inject("authToken")
+    const authToken = inject<AuthToken>("authToken")!
 
     const email = ref("")
     const password = ref("")
 
     function loginRequest() {
-        this.authToken.createNewJwtTokenByCredentials(this.email, this.password)
+        authToken.createNewJwtTokenByCredentials(email.value, password.value)
             .then((response: any) => eventBus.emit("loginSuccessEvent"))
     }
 

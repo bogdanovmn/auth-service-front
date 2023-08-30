@@ -1,17 +1,30 @@
 <script setup lang="ts">
     import { ref, inject, reactive } from 'vue'
+    import { AuthToken } from '../common/auth-token'
+    import AuthRequest from '../common/auth-request'
 
-    const authToken = inject("authToken")
-    const http = inject("http")
+    const authToken = inject<AuthToken>("authToken")!
+    const http = inject<AuthRequest>("http")!
 
-    const data = ref({})
+    const data = ref<ApplictionsOverview>()
 
-    function loadApplications() {
-        return http.get("http://localhost:8091/applications")
-            .then(resp => data.value = resp.data)
+    type ApplictionsOverview = {
+        id: number;
+        name: string;
+        roles: Role[]
     }
 
-    data.value = loadApplications()
+    type Role = {
+        name: string;
+        usersCount: number;
+    }
+
+    function loadApplications() {
+        return http.get<ApplictionsOverview>("http://localhost:8091/applications")
+            .then(resp => data.value = resp)
+    }
+
+    loadApplications()
 
 </script>
 

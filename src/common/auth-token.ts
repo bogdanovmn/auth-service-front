@@ -1,6 +1,9 @@
 import axios from 'axios'
 import jwt_decode from "jwt-decode";
 
+type TokenData = {
+    userName: string;
+}
 
 export class AuthToken {
     private authServiceUrl: string
@@ -22,9 +25,9 @@ export class AuthToken {
         }
     }
 
-    public userName(): string {
+    public userName(): string | null {
         return this.defined()
-            ? jwt_decode(this.token).userName
+            ? jwt_decode<TokenData>(this.token!).userName
             : null
     }
 
