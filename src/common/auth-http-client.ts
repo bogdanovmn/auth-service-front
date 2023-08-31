@@ -1,5 +1,6 @@
-import axios, {AxiosError} from 'axios'
-import { AuthToken } from './auth-token'
+import axios from 'axios'
+import { SsoService } from './sso-service'
+import { tokenStorage } from './token-storage'
 
 
 type ErrorResponse = {
@@ -11,12 +12,12 @@ type ErrorResponse = {
 class UnauthenticatedError extends Error {
 }
 
-class AuthRequest {
-    private authToken: AuthToken;
+export class AuthHttpClient {
+    private ssoService: SsoService
     private onFailAction: Function;
 
-    constructor(authToken: AuthToken, onFailFunction: Function = () => {}) {
-        this.authToken = authToken
+    constructor( ssoService: SsoService, onFailFunction: Function = () => {}) {
+        this.ssoService = ssoService
         this.onFailAction = onFailFunction;
     }
 
@@ -24,21 +25,16 @@ class AuthRequest {
         return this.httpRequest<ResponseType>(() => this.directHttpRequest<ResponseType>("GET", url))
     }
 
-    async logout(): Promise<void> {
-        return this.httpRequest<void>(() => this.authToken.revoke())
-    }
-
-    async httpRequest<ResponseType>(requestFunction: () => Promise<ResponseType>): Promise<ResponseType> {
+    private async httpRequest<ResponseType>(requestFunction: () => Promise<ResponseType>): Promise<ResponseType> {
         return this.httpRequestTry<ResponseType>(requestFunction)
             .catch(async (error: any) => {
                 if (error instanceof UnauthenticatedError) {
                     console.log("Try to refresh token")
-                    return await this.authToken.refreshJwtToken()
-                        .then((response: any) => {
+                    return await this.ssoService.refreshToken()
+                        .then(() => {
                             console.log("Re-sending the request")
                             return this.httpRequestTry<ResponseType>(requestFunction)
                                 .catch((error: any) => {
-                                    console.log(this.onFailAction)
                                     if (this.onFailAction) {
                                         this.onFailAction()
                                     }
@@ -66,7 +62,7 @@ class AuthRequest {
         let resp = axios<ResponseType>({
             method: method,
             url: url,
-            headers: this.authToken.header()
+            headers: tokenStorage.header()
         })
         return (await resp).data
     }
@@ -88,5 +84,3 @@ class AuthRequest {
     }
 
 }
-
-export default AuthRequest;

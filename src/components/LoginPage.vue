@@ -1,27 +1,17 @@
 <script setup lang="ts">
-    import { ref, inject } from 'vue'
-    import axios from 'axios';
-    import router from '../router'
-    import eventBus from '../common/event-bus'
-import { AuthToken } from '../common/auth-token';
+    import { inject, ref } from 'vue';
+    import eventBus from '../common/event-bus';
+    import { SsoService } from '../common/sso-service';
 
-    const http = inject("http")
-    const authToken = inject<AuthToken>("authToken")!
+    const ssoService = inject<SsoService>("ssoService")!
 
     const email = ref("")
     const password = ref("")
 
     function loginRequest() {
-        authToken.createNewJwtTokenByCredentials(email.value, password.value)
-            .then((response: any) => eventBus.emit("loginSuccessEvent"))
+        ssoService.createNewTokenByCredentials(email.value, password.value)
+            .then(() => eventBus.emit("loginSuccessEvent"))
     }
-
-    // axios.interceptors.request.use(
-    //     request => {
-    //         console.log('Starting Request', JSON.stringify(request, null, 2))
-    //         return request
-    //     }
-    // )
 
 </script>
 

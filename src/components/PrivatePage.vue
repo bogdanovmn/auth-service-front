@@ -1,45 +1,41 @@
 <script setup lang="ts">
-    import { ref, inject, reactive } from 'vue'
-    import { AuthToken } from '../common/auth-token'
-    import AuthRequest from '../common/auth-request'
+    import { ref, inject } from 'vue'
+    import { ApplictionsOverview, SsoResourcesService } from '../common/sso-resources-service';
+    import { tokenStorage } from '../common/token-storage'
 
-    const authToken = inject<AuthToken>("authToken")!
-    const http = inject<AuthRequest>("http")!
 
-    const data = ref<ApplictionsOverview>()
+    const ssoResourceService = inject<SsoResourcesService>("ssoResourceService")!
 
-    type ApplictionsOverview = {
-        id: number;
-        name: string;
-        roles: Role[]
-    }
-
-    type Role = {
-        name: string;
-        usersCount: number;
-    }
-
-    function loadApplications() {
-        return http.get<ApplictionsOverview>("http://localhost:8091/applications")
-            .then(resp => data.value = resp)
-    }
-
-    loadApplications()
+    const data = ref<ApplictionsOverview[]>()
+    ssoResourceService.applicationsOverview()
+        .then(overview => data.value = overview)
 
 </script>
 
 <template>
     <h1>Private Page</h1>
 
-    Hello, {{authToken.userName()}}
+    Hello, {{tokenStorage.userName()}}
 
-    <h2>Data</h2>
-    {{data}}
+    <h2>Applications overview</h2>
+    <div v-for="app in data" class="app">
+        <span class="name">{{ app.name }}</span>
+        <span v-if="app.roles.length > 0">
+            has roles: [
+            <span v-for="role in app.roles" class="role">
+                {{ role.name }}<span class="note">({{ role.usersCount }})</span>
+            </span>
+            ]
+        </span>
+    </div>
 
     <div>
     </div>
 </template>
 
 <style scoped>
-
+div.app { margin-bottom: 10px; padding: 5px;}
+div.app span.name { font-weight: bold;}
+div.app span.role { padding: 0px 5px;}
+span.note { color: gray; }
 </style>

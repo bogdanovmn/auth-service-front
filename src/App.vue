@@ -1,7 +1,6 @@
 <script setup lang="ts">
-    import { ref, inject } from 'vue'
+    import { ref } from 'vue'
     import router from './router'
-    import './common/auth-request'
     import eventBus from './common/event-bus'
 
     

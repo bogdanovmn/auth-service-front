@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { ref, inject } from 'vue'
-import axios from 'axios';
 import eventBus from '../common/event-bus'
-import { AuthToken } from '../common/auth-token';
+import { SsoService } from '../common/sso-service'
 
-const authToken = inject<AuthToken>("authToken")!
+const ssoService = inject<SsoService>("ssoService")!
 
 const name = ref("")
 const email = ref("")
@@ -22,13 +21,13 @@ function signupWithPassword() {
     } else if (password.value != passwordCheck.value) {
         alert.value = "Passwords must be matched"
     } else {
-        axios.post("http://localhost:8091/accounts", {
+        ssoService.createAccount({
             accountName: name.value,
             email: email.value,
             password: password.value
         }).then(
             () => {
-                authToken.createNewJwtTokenByCredentials(email.value, password.value)
+                ssoService.createNewTokenByCredentials(email.value, password.value)
                     .then(() => eventBus.emit("loginSuccessEvent"))
         })
     }

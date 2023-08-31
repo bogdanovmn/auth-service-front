@@ -1,13 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { inject } from 'vue'
 
 import RegistrationPage from '../components/RegistrationPage.vue'
 import LoginPage from '../components/LoginPage.vue'
 import PrivatePage from './../components/PrivatePage.vue'
-
-import { authToken } from '../common/auth-token'
-import AuthRequest from '../common/auth-request'
 import eventBus from '../common/event-bus'
 
+import { tokenStorage } from "../common/token-storage";
+import { SsoService } from '../common/sso-service'
+
+
+const ssoService = new SsoService(import.meta.env.VITE_SSO_SERVICE_URL)
 
 const router = createRouter({
     history: createWebHistory(),
@@ -22,9 +25,9 @@ const router = createRouter({
 router.beforeEach(
     async (to: any) => {
         if (to.matched.some((route: any) => route.meta.private)) {
-            if (authToken().defined()) {
+            if (tokenStorage.defined()) {
                 if (to.fullPath == '/logout') {
-                    await new AuthRequest(authToken()).logout()
+                    await ssoService.deleteRefreshToken()
                     eventBus.emit("logoutEvent")
                     return { path: '/login' }
                 }
@@ -32,7 +35,7 @@ router.beforeEach(
                 return { path: '/login' };
             }
         } else {
-            if (authToken().defined()) {
+            if (tokenStorage.defined()) {
                 return { path: "/" }
             }
         }
