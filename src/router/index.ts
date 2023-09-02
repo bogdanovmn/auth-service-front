@@ -1,13 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { inject } from 'vue'
-
 import RegistrationPage from '../components/RegistrationPage.vue'
 import LoginPage from '../components/LoginPage.vue'
 import PrivatePage from './../components/PrivatePage.vue'
 import eventBus from '../common/event-bus'
 
-import { tokenStorage } from "../common/token-storage";
-import { SsoService } from '../common/sso-service'
+import { SsoService, tokenStorage } from "@bogdanovmn/ssofw"
 
 
 const ssoService = new SsoService(import.meta.env.VITE_SSO_SERVICE_URL)

@@ -1,4 +1,5 @@
-import { AuthHttpClient } from "./auth-http-client";
+import { AuthHttpClient } from "@bogdanovmn/ssofw"
+
 
 export type ApplictionsOverview = {
     id: number;

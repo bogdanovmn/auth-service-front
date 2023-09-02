@@ -1,9 +1,9 @@
 <script setup lang="ts">
     import { ref, inject } from 'vue'
     import { ApplictionsOverview, SsoResourcesService } from '../common/sso-resources-service';
-    import { tokenStorage } from '../common/token-storage'
+    import { tokenStorage } from "@bogdanovmn/ssofw"
 
-
+    
     const ssoResourceService = inject<SsoResourcesService>("ssoResourceService")!
 
     const data = ref<ApplictionsOverview[]>()
@@ -15,7 +15,7 @@
 <template>
     <h1>Private Page</h1>
 
-    Hello, {{tokenStorage.userName()}}
+    Hello, {{tokenStorage.claims?.userName}}
 
     <h2>Applications overview</h2>
     <div v-for="app in data" class="app">

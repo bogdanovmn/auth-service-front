@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, inject } from 'vue'
 import eventBus from '../common/event-bus'
-import { SsoService } from '../common/sso-service'
+import { SsoService } from "@bogdanovmn/ssofw"
+
 
 const ssoService = inject<SsoService>("ssoService")!
 

@@ -2,9 +2,9 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import './style.css'
-import { AuthHttpClient } from './common/auth-http-client'
+import { SsoService, AuthHttpClient } from "@bogdanovmn/ssofw"
+
 import { SsoResourcesService } from './common/sso-resources-service'
-import { SsoService } from './common/sso-service'
 
 
 const ssoService = new SsoService(import.meta.env.VITE_SSO_SERVICE_URL)
