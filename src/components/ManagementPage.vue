@@ -3,7 +3,7 @@
     import { ApplictionsOverview, SsoResourcesService } from '../common/sso-resources-service';
     import { tokenStorage } from "@bogdanovmn/ssofw"
 
-    
+
     const ssoResourceService = inject<SsoResourcesService>("ssoResourceService")!
 
     const data = ref<ApplictionsOverview[]>()
@@ -13,7 +13,7 @@
 </script>
 
 <template>
-    <h1>Private Page</h1>
+    <h1>Managment</h1>
 
     Hello, {{tokenStorage.claims?.userName}}
 

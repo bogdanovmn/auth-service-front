@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, inject } from 'vue'
-import eventBus from '../common/event-bus'
+import { eventBus, Event } from '../common/event-bus'
 import { SsoService } from "@bogdanovmn/ssofw"
 
 
@@ -29,7 +29,7 @@ function signupWithPassword() {
         }).then(
             () => {
                 ssoService.createNewTokenByCredentials(email.value, password.value)
-                    .then(() => eventBus.emit("loginSuccessEvent"))
+                    .then(() => eventBus.emit(Event.login))
         })
     }
 }

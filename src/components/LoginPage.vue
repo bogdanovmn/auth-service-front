@@ -1,6 +1,6 @@
 <script setup lang="ts">
     import { inject, ref } from 'vue';
-    import eventBus from '../common/event-bus';
+    import { eventBus, Event } from '../common/event-bus';
     import { SsoService } from "@bogdanovmn/ssofw"
 
 
@@ -11,7 +11,7 @@
 
     function loginRequest() {
         ssoService.createNewTokenByCredentials(email.value, password.value)
-            .then(() => eventBus.emit("loginSuccessEvent"))
+            .then(() => eventBus.emit(Event.login))
     }
 
 </script>

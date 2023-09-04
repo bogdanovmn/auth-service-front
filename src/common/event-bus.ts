@@ -1,4 +1,8 @@
 import mitt from 'mitt'
 
-const eventBus = mitt()
-export default eventBus
+export enum Event {
+    logout = 'logoutEvent',
+    login = 'loginEvent'
+}
+
+export const eventBus = mitt()
