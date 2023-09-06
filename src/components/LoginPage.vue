@@ -2,16 +2,29 @@
     import { inject, ref } from 'vue';
     import { eventBus, Event } from '../common/event-bus';
     import { SsoService } from "@bogdanovmn/ssofw"
+    import { useRoute } from 'vue-router';
 
 
     const ssoService = inject<SsoService>("ssoService")!
 
     const email = ref("")
     const password = ref("")
+    const from = useRoute().query.from
 
     function loginRequest() {
-        ssoService.createNewTokenByCredentials(email.value, password.value)
-            .then(() => eventBus.emit(Event.login))
+        if (from) {
+            ssoService.exchangeCredentialsToCode(email.value, password.value)
+                .then(
+                    code => {
+                        const redirectBackUrl = new URL(from.toString())
+                        redirectBackUrl.searchParams.append('code', code)
+                        window.location.href = redirectBackUrl.toString()
+                    }
+                )
+        } else {
+            ssoService.createNewTokenByCredentials(email.value, password.value)
+                .then(() => eventBus.emit(Event.login))
+        }
     }
 
 </script>
