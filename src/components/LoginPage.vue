@@ -10,8 +10,13 @@
     const email = ref("")
     const password = ref("")
     const from = useRoute().query.from
+    const error = ref("")
+    const isLoading = ref(false)
 
     function loginRequest() {
+        error.value = ""
+        isLoading.value = true
+
         if (from) {
             ssoService.exchangeCredentialsToCode(email.value, password.value)
                 .then(
@@ -21,9 +26,45 @@
                         window.location.href = redirectBackUrl.toString()
                     }
                 )
+                .catch(err => {
+                    handleLoginError(err)
+                })
+                .finally(() => {
+                    isLoading.value = false
+                })
         } else {
             ssoService.createNewTokenByCredentials(email.value, password.value)
                 .then(() => eventBus.emit(Event.login))
+                .catch(err => {
+                    handleLoginError(err)
+                })
+                .finally(() => {
+                    isLoading.value = false
+                })
+        }
+    }
+
+    function handleLoginError(err: any) {
+        console.error('Login error:', err)
+        
+        if (err?.response?.status === 404) {
+            error.value = "User not found. Please check your email and password."
+        } else if (err?.response?.status === 401) {
+            error.value = "Invalid credentials. Please check your email and password."
+        } else if (err?.response?.status === 403) {
+            error.value = "Access denied. Your account may be disabled."
+        } else if (err?.response?.status >= 500) {
+            error.value = "Server error. Please try again later."
+        } else if (err?.code === 'NETWORK_ERROR' || !navigator.onLine) {
+            error.value = "Network error. Please check your internet connection."
+        } else {
+            error.value = "Login failed. Please try again."
+        }
+    }
+
+    function clearError() {
+        if (error.value) {
+            error.value = ""
         }
     }
 
@@ -44,6 +85,15 @@
                 <p class="login-subtitle">Sign in to your account to continue</p>
             </div>
 
+            <div v-if="error" class="alert alert-error">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                {{ error }}
+            </div>
+
             <form @submit.prevent="loginRequest" class="login-form">
                 <div class="form-group">
                     <label class="form-label" for="email">
@@ -59,6 +109,7 @@
                         class="form-input" 
                         placeholder="Enter your email" 
                         v-model="email"
+                        @input="clearError"
                         required
                         autocomplete="email"
                     />
@@ -79,18 +130,20 @@
                         class="form-input" 
                         placeholder="Enter your password" 
                         v-model="password"
+                        @input="clearError"
                         required
                         autocomplete="current-password"
                     />
                 </div>
 
-                <button type="submit" class="btn btn-primary login-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button type="submit" class="btn btn-primary login-btn" :disabled="isLoading">
+                    <div v-if="isLoading" class="loading"></div>
+                    <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
                         <polyline points="10,17 15,12 10,7"/>
                         <line x1="15" y1="12" x2="3" y2="12"/>
                     </svg>
-                    Sign In
+                    {{ isLoading ? 'Signing In...' : 'Sign In' }}
                 </button>
             </form>
 

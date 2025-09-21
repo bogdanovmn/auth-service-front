@@ -11,16 +11,24 @@ const email = ref("")
 const password = ref("")
 const passwordCheck = ref("")
 const alert = ref("")
+const isLoading = ref(false)
 
 function signupWithPassword() {
+    alert.value = ""
+    isLoading.value = true
+
     if (!name.value) {
         alert.value = "Name must be specified"
+        isLoading.value = false
     } else if (!email.value) {
         alert.value = "Email must be specified"
+        isLoading.value = false
     } else if (!password.value) {
         alert.value = "Password must be specified"
+        isLoading.value = false
     } else if (password.value != passwordCheck.value) {
         alert.value = "Passwords must be matched"
+        isLoading.value = false
     } else {
         ssoService.createAccount({
             accountName: name.value,
@@ -30,7 +38,37 @@ function signupWithPassword() {
             () => {
                 ssoService.createNewTokenByCredentials(email.value, password.value)
                     .then(() => eventBus.emit(Event.login))
+                    .catch(err => {
+                        handleRegistrationError(err)
+                    })
+            }
+        ).catch(err => {
+            handleRegistrationError(err)
+        }).finally(() => {
+            isLoading.value = false
         })
+    }
+}
+
+function handleRegistrationError(err: any) {
+    console.error('Registration error:', err)
+    
+    if (err?.response?.status === 409) {
+        alert.value = "An account with this email already exists."
+    } else if (err?.response?.status === 400) {
+        alert.value = "Invalid registration data. Please check your information."
+    } else if (err?.response?.status >= 500) {
+        alert.value = "Server error. Please try again later."
+    } else if (err?.code === 'NETWORK_ERROR' || !navigator.onLine) {
+        alert.value = "Network error. Please check your internet connection."
+    } else {
+        alert.value = "Registration failed. Please try again."
+    }
+}
+
+function clearAlert() {
+    if (alert.value) {
+        alert.value = ""
     }
 }
 
@@ -76,6 +114,7 @@ function signupWithPassword() {
                         class="form-input" 
                         placeholder="Enter your full name" 
                         v-model="name"
+                        @input="clearAlert"
                         required
                         autocomplete="name"
                     />
@@ -95,6 +134,7 @@ function signupWithPassword() {
                         class="form-input" 
                         placeholder="Enter your email" 
                         v-model="email"
+                        @input="clearAlert"
                         required
                         autocomplete="email"
                     />
@@ -115,6 +155,7 @@ function signupWithPassword() {
                         class="form-input" 
                         placeholder="Create a strong password" 
                         v-model="password"
+                        @input="clearAlert"
                         required
                         autocomplete="new-password"
                     />
@@ -135,19 +176,21 @@ function signupWithPassword() {
                         class="form-input" 
                         placeholder="Confirm your password" 
                         v-model="passwordCheck"
+                        @input="clearAlert"
                         required
                         autocomplete="new-password"
                     />
                 </div>
 
-                <button type="submit" class="btn btn-primary registration-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button type="submit" class="btn btn-primary registration-btn" :disabled="isLoading">
+                    <div v-if="isLoading" class="loading"></div>
+                    <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                         <circle cx="8.5" cy="7" r="4"/>
                         <line x1="20" y1="8" x2="20" y2="14"/>
                         <line x1="23" y1="11" x2="17" y2="11"/>
                     </svg>
-                    Create Account
+                    {{ isLoading ? 'Creating Account...' : 'Create Account' }}
                 </button>
             </form>
 
