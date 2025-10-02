@@ -23,6 +23,7 @@
                     code => {
                         const redirectBackUrl = new URL(from.toString())
                         redirectBackUrl.searchParams.append('code', code)
+                        console.log(`redirectBackUrl: ${redirectBackUrl.toString()}`)
                         window.location.href = redirectBackUrl.toString()
                     }
                 )

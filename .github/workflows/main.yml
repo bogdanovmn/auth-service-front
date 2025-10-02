@@ -1,0 +1,56 @@
+name: Deploy Frontend
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Установка зависимостей
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Сборка Vue 3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Build Frontend
+        run: |
+          npm ci         # Используем ci для чистой установки зависимостей
+          npm run build  # Предполагается, что это создает папку dist
+        working-directory: ./
+
+      - name: Set variables
+        id: vars
+        run: |
+          echo "TARGET_DIR=/home/www/sso" >> $GITHUB_OUTPUT
+
+      - name: Prepare VPS
+        id: prepare
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.JINOJ_HOST }}
+          port: ${{ secrets.JINOJ_PORT }}
+          username: ${{ secrets.JINOJ_USER }}
+          key: ${{ secrets.JINOJ_KEY }}
+          script: |
+            mkdir -p ${{ steps.vars.outputs.TARGET_DIR }}
+            TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+            BACKUP_DIR=/home/www-backup/sso_$TIMESTAMP
+            mkdir -p $BACKUP_DIR
+            cp -R ${{ steps.vars.outputs.TARGET_DIR }}/* $BACKUP_DIR
+            rm -rf ${{ steps.vars.outputs.TARGET_DIR }}/*
+
+      - name: Copy files to VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.JINOJ_HOST }}
+          port: ${{ secrets.JINOJ_PORT }}
+          username: ${{ secrets.JINOJ_USER }}
+          key: ${{ secrets.JINOJ_KEY }}
+          source: "dist/*"
+          target: ${{ steps.vars.outputs.TARGET_DIR }}
+          strip_components: 1
