@@ -29,10 +29,9 @@ jobs:
       - name: Build Frontend
         run: |
           cd ssofw-lib
-          npm install
+          npm ci
           npm run build
           cd ..
-          npm install ./ssofw-lib
           npm ci
           npm run build
 
