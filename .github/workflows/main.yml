@@ -25,17 +25,14 @@ jobs:
         with:
           node-version: '18'
 
-      # Install and link public library
-      - name: Setup public library
-        run: |
-          cd ssofw-lib
-          npm install
-          npm run build  # если нужна сборка библиотеки
-          npm link
-
       # Build Frontend with linked library
       - name: Build Frontend
         run: |
+          cd ssofw-lib
+          npm install
+          npm run build
+          npm link
+          cd ..
           npm link @bogdanovmn/ssofw
           npm ci
           npm run build
