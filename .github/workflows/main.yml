@@ -32,7 +32,7 @@ jobs:
           npm ci
           npm run build
           cd ..
-          npm ci
+          npm install ./ssofw-lib
           npm run build
 
       # Rest of your deployment steps
