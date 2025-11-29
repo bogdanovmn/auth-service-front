@@ -31,9 +31,8 @@ jobs:
           cd ssofw-lib
           npm install
           npm run build
-          npm link
           cd ..
-          npm link @bogdanovmn/ssofw
+          npm install ./ssofw-lib
           npm ci
           npm run build
 
