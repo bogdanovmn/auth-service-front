@@ -2,12 +2,9 @@
     import { useRouter } from 'vue-router'
     import { eventBus, Event } from '../common/event-bus'
     
-    defineProps({
-        userName: {
-            type: String,
-            default: null
-        }
-    })
+    defineProps<{
+        userName?: string | null
+    }>()
     const router = useRouter()
 
     function gotToLogin() {

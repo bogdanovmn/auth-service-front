@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useRouter } from 'vue-router';
+
+import { notificationStore } from "../stores/notifications";
+
 
 const router = useRouter()
-const errorMsg = localStorage.getItem("errorMsg") || 'An unexpected error occurred'
+const notifStore = notificationStore();
 
 function goBack() {
     window.history.back()
@@ -39,7 +42,7 @@ function goHome() {
                             <line x1="16" y1="17" x2="8" y2="17"/>
                             <polyline points="10,9 9,9 8,9"/>
                         </svg>
-                        <span>{{ errorMsg }}</span>
+                        <span>{{ notifStore.getError() }}</span>
                     </div>
                 </div>
 

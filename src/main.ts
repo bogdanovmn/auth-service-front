@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import './style.css'
@@ -18,6 +19,7 @@ const authHttpClient = new AuthHttpClient(
 const ssoResourceService = new SsoResourcesService(import.meta.env.VITE_SSO_SERVICE_URL, authHttpClient)
 
 createApp(App)
+    .use(createPinia())
     .use(router)
     .provide("ssoResourceService", ssoResourceService)
     .provide("ssoService", ssoService)

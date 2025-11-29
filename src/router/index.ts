@@ -1,4 +1,3 @@
-import { inject } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import RegistrationPage from '../components/RegistrationPage.vue'
@@ -6,15 +5,15 @@ import LoginPage from '../components/LoginPage.vue'
 import ManagmentPage from './../components/ManagementPage.vue'
 import ErrorPage from './../components/ErrorPage.vue'
 
-import { eventBus, Event } from '../common/event-bus'
-import { SsoService, tokenStorage, Role } from "@bogdanovmn/ssofw"
+import { tokenStorage, Role } from "@bogdanovmn/ssofw"
+import { notificationStore } from "../stores/notifications"
 
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHistory('/sso/'),
     routes: [
         { path: "/error",        component: ErrorPage },
-        { path: "/login",        component: LoginPage },
+        { path: "/login",        component: LoginPage, meta: { onlyForUnauth: true } },
         { path: "/registration", component: RegistrationPage },
         { path: "/managment",    component: ManagmentPage, meta: { allow: Role.admin } },
         { path: "/logout",       component: LoginPage, meta: { private: true } },
@@ -23,16 +22,11 @@ const router = createRouter({
     ]
 })
 
-function error(msg: string) {
-    localStorage.setItem("errorMsg", msg)
-    return { path: "/error" }
-}
 
 router.beforeEach(
     async (to: any) => {
-        localStorage.removeItem("errorMsg")
+        const notifStore = notificationStore();
 
-        const ssoService = inject<SsoService>("ssoService")!
         const isAuthenticated = tokenStorage.defined()
         const isAdmin = tokenStorage.claims?.isSuperAdmin()
         const targetRole: Role = to.meta.allow
@@ -48,7 +42,17 @@ router.beforeEach(
             return error('Permission denied')
         }
 
-        return true
+        if (to.meta.onlyForUnauth && isAuthenticated) {
+            return error('Permission denied')
+        }
+
+        return true;
+
+        function error(msg: string) {
+            notifStore.setError(msg);
+            console.log("set error msg = " + msg)
+            return { path: "/error" }
+        }
     }
 );
 
