@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@bogdanovmn/ssofw": "1.0.1",
+    "@bogdanovmn/ssofw": "^1.0.1",
     "axios": "1.2.1",
     "jwt-decode": "3.1.2",
     "mitt": "3.0.0",
