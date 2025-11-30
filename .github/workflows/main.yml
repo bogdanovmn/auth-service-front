@@ -12,13 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Checkout public library
-      - name: Checkout public library
-        uses: actions/checkout@v3
-        with:
-          repository: bogdanovmn/js-ssofw
-          path: ssofw-lib
-
       # Setup Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -28,11 +21,7 @@ jobs:
       # Build Frontend with linked library
       - name: Build Frontend
         run: |
-          cd ssofw-lib
           npm ci
-          npm run build
-          cd ..
-          npm install ./ssofw-lib
           npm run build
 
       # Rest of your deployment steps
