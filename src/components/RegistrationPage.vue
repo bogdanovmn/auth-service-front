@@ -2,8 +2,10 @@
 import { ref, inject } from 'vue'
 import { eventBus, Event } from '../common/event-bus'
 import { SsoService } from "@bogdanovmn/ssofw"
+import { authStore } from "../stores/auth"
 
 
+const auth = authStore()
 const ssoService = inject<SsoService>("ssoService")!
 
 const name = ref("")
@@ -36,11 +38,17 @@ function signupWithPassword() {
             password: password.value
         }).then(
             () => {
-                ssoService.createNewTokenByCredentials(email.value, password.value)
-                    .then(() => eventBus.emit(Event.login))
-                    .catch(err => {
-                        handleRegistrationError(err)
-                    })
+                const tokenPromise = auth.redirectToAfterSuccessLogin
+                    ? ssoService.exchangeCredentialsToCode(email.value, password.value)
+                        .then((code) => {
+                            auth.codeToExchange = code
+                            eventBus.emit(Event.login)
+                        })
+                    : ssoService.createNewTokenByCredentials(email.value, password.value)
+                        .then(() => eventBus.emit(Event.login));
+                tokenPromise.catch(err => {
+                    handleRegistrationError(err)
+                })
             }
         ).catch(err => {
             handleRegistrationError(err)

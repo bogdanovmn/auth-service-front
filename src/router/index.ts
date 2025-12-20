@@ -13,7 +13,7 @@ const router = createRouter({
     history: createWebHistory('/sso/'),
     routes: [
         { path: "/error",        component: ErrorPage },
-        { path: "/login",        component: LoginPage, meta: { onlyForUnauth: true } },
+        { path: "/login",        component: LoginPage },
         { path: "/registration", component: RegistrationPage },
         { path: "/managment",    component: ManagmentPage, meta: { allow: Role.admin } },
         { path: "/logout",       component: LoginPage, meta: { private: true } },
@@ -39,10 +39,6 @@ router.beforeEach(
         }
 
         if (privateTarget && !isAuthenticated) {
-            return error('Permission denied')
-        }
-
-        if (to.meta.onlyForUnauth && isAuthenticated) {
             return error('Permission denied')
         }
 

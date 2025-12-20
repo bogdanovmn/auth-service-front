@@ -15,13 +15,19 @@
     
     eventBus.on(Event.login, () => {
         auth.update()
-        if (auth.isAdmin) {
-            router.push('/managment')
+        if (auth.redirectToAfterSuccessLogin) {
+            const redirectBackUrl = new URL(auth.redirectToAfterSuccessLogin!)
+            redirectBackUrl.searchParams.append('code', auth.codeToExchange!)
+            console.log(`redirectBackUrl: ${redirectBackUrl.toString()}`)
+            window.location.href = redirectBackUrl.toString()
         } else {
-            notifStore.setError("Permission denied")
-            router.push('/error')
+            if (auth.isAdmin) {
+                router.push('/managment')
+            } else {
+                notifStore.setError("Permission denied")
+                router.push('/error')
+            }
         }
-        router.push(auth.isAdmin ? "/managment" : "/error")
     });
     eventBus.on(Event.logout, async () => {
         console.log("try to delete tokens")

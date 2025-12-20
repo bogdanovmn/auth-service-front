@@ -6,6 +6,8 @@ export const authStore = defineStore('authStore', () => {
   const isAuthenticated = ref(false);
   const userName = ref<string | null>(null);
   const isAdmin = ref<boolean>(false);
+  const redirectToAfterSuccessLogin = ref<string | null>(null);
+  const codeToExchange = ref<string | null>(null)
 
   function update() {
     isAuthenticated.value = tokenStorage.defined();
@@ -19,6 +21,8 @@ export const authStore = defineStore('authStore', () => {
     isAuthenticated,
     isAdmin,
     userName,
-    update
+    update,
+    redirectToAfterSuccessLogin,
+    codeToExchange
   };
 });

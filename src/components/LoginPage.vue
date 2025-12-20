@@ -1,32 +1,43 @@
 <script setup lang="ts">
-    import { inject, ref } from 'vue';
+    import { inject, onMounted, ref } from 'vue';
     import { eventBus, Event } from '../common/event-bus';
     import { SsoService } from "@bogdanovmn/ssofw"
     import { useRoute } from 'vue-router';
+    import { authStore } from "../stores/auth"
+    import router from '../router';
 
 
+    const auth = authStore()
     const ssoService = inject<SsoService>("ssoService")!
 
     const email = ref("")
     const password = ref("")
-    const from = useRoute().query.from
+    auth.redirectToAfterSuccessLogin = useRoute().query.from?.toString() ?? null
     const error = ref("")
     const isLoading = ref(false)
+
+    onMounted(() => {
+        if (auth.redirectToAfterSuccessLogin && auth.isAuthenticated) {
+            ssoService.exchangeJwtToCode()
+                .then(redirectWithCode)
+                .catch(() => router.push("/login"))
+        }
+    });
+
+    function redirectWithCode(code: string) {
+        const redirectBackUrl = new URL(auth.redirectToAfterSuccessLogin!)
+        redirectBackUrl.searchParams.append('code', code)
+        console.log(`redirectBackUrl: ${redirectBackUrl.toString()}`)
+        window.location.href = redirectBackUrl.toString()
+    }
 
     function loginRequest() {
         error.value = ""
         isLoading.value = true
 
-        if (from) {
+        if (auth.redirectToAfterSuccessLogin) {
             ssoService.exchangeCredentialsToCode(email.value, password.value)
-                .then(
-                    code => {
-                        const redirectBackUrl = new URL(from.toString())
-                        redirectBackUrl.searchParams.append('code', code)
-                        console.log(`redirectBackUrl: ${redirectBackUrl.toString()}`)
-                        window.location.href = redirectBackUrl.toString()
-                    }
-                )
+                .then(redirectWithCode)
                 .catch(err => {
                     handleLoginError(err)
                 })

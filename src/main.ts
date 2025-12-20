@@ -10,6 +10,7 @@ import { SsoResourcesService } from './common/sso-resources-service'
 console.log(import.meta.env)
 const ssoService = new SsoService(import.meta.env.VITE_SSO_SERVICE_URL)
 const authHttpClient = new AuthHttpClient(
+    import.meta.env.VITE_SSO_SERVICE_URL,
     ssoService,
     () => {
         console.log("auto logout...");
