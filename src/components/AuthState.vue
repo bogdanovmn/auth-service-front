@@ -1,10 +1,19 @@
 <script setup lang="ts">
+    import { computed } from 'vue'
     import { eventBus, Event } from '../common/event-bus'
     import { t } from '../i18n'
     
-    defineProps<{
+    const props = defineProps<{
         userName?: string | null
     }>()
+
+    const initials = computed(() => {
+        if (!props.userName) return ''
+        const parts = props.userName.trim().split(/\s+/).filter(Boolean)
+        const first = parts[0]?.[0] ?? ''
+        const second = parts[1]?.[0] ?? ''
+        return (first + second).toUpperCase() || '?'
+    })
 
     async function logout() {
         eventBus.emit(Event.logout)
@@ -14,20 +23,18 @@
 <template>
     <div class="auth-state">
         <div v-if="userName" class="user-info">
-            <div class="user-avatar">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                    <circle cx="12" cy="7" r="4"/>
-                </svg>
-            </div>
-            <span class="user-name">{{ userName }}</span>
-            <button @click="logout()" class="btn btn-sm btn-danger">
+            <div class="user-avatar">{{ initials }}</div>
+            <button
+                @click="logout()"
+                class="btn btn-sm btn-danger logout-btn"
+                :title="t('auth.logout')"
+                :aria-label="t('auth.logout')"
+            >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                     <polyline points="16,17 21,12 16,7"/>
                     <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
-                {{ t('auth.logout') }}
             </button>
         </div>
     </div>
@@ -44,11 +51,6 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .user-avatar {
@@ -60,31 +62,26 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 50%;
     color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
 }
 
-.user-name {
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.875rem;
+.logout-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
+    padding: 0;
+    margin: 0;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
     .auth-state {
         gap: 0.5rem;
-    }
-    
-    .user-info {
-        padding: 0.5rem 0.75rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .user-info {
-        padding: 0.75rem;
-    }
-    
-    .user-name {
-        font-size: 0.8rem;
     }
 }
 </style>

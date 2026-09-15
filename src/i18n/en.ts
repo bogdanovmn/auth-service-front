@@ -1,7 +1,6 @@
 export default {
     nav: {
         brand: 'Single Sign-On',
-        management: 'Management',
     },
     auth: {
         logout: 'Logout',

@@ -87,15 +87,19 @@
     <div class="container-xs">
         <div class="card">
             <div class="login-header">
-                <div class="login-icon">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                        <polyline points="10,17 15,12 10,7"/>
-                        <line x1="15" y1="12" x2="3" y2="12"/>
-                    </svg>
+                <div class="login-brand">
+                    <div class="login-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                            <polyline points="10,17 15,12 10,7"/>
+                            <line x1="15" y1="12" x2="3" y2="12"/>
+                        </svg>
+                    </div>
+                    <div class="login-title">
+                        <h1>{{ t('login.welcome') }}</h1>
+                        <p class="login-subtitle">{{ t('login.subtitle') }}</p>
+                    </div>
                 </div>
-                <h1>{{ t('login.welcome') }}</h1>
-                <p class="login-subtitle">{{ t('login.subtitle') }}</p>
             </div>
 
             <div v-if="error" class="alert alert-error">
@@ -171,14 +175,19 @@
 
 <style scoped>
 .login-header {
-    text-align: center;
     margin-bottom: 2rem;
+}
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
 }
 
 .login-icon {
     display: flex;
     justify-content: center;
-    margin-bottom: 1rem;
+    flex-shrink: 0;
 }
 
 .login-icon svg {
@@ -188,10 +197,20 @@
     border-radius: 50%;
 }
 
+.login-title {
+    text-align: left;
+    min-width: 0;
+}
+
+.login-title h1 {
+    margin-bottom: 0;
+    text-align: left;
+}
+
 .login-subtitle {
     color: #6b7280;
     font-size: 1rem;
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
 }
 
 .login-form {
@@ -251,6 +270,10 @@
 @media (max-width: 480px) {
     .login-header {
         margin-bottom: 1.5rem;
+    }
+    
+    .login-brand {
+        gap: 0.75rem;
     }
     
     .login-icon svg {

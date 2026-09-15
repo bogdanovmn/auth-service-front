@@ -50,18 +50,8 @@
                     <h3>{{ t('nav.brand') }}</h3>
                 </div>
                 <div class="nav-links">
-                    <template v-if="auth.userName">
-                        <router-link to="/managment" v-if="auth.isAdmin" class="nav-link">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                                <path d="M2 17l10 5 10-5"/>
-                                <path d="M2 12l10 5 10-5"/>
-                            </svg>
-                            {{ t('nav.management') }}
-                        </router-link>
-                    </template>
-                    <auth-state :user-name="auth.userName"/>
                     <locale-switcher/>
+                    <auth-state :user-name="auth.userName"/>
                 </div>
             </div>
         </nav>

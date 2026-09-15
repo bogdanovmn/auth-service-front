@@ -9,7 +9,6 @@ function pluralRu(count: number, one: string, few: string, many: string): string
 export default {
     nav: {
         brand: 'Единая Дверь',
-        management: 'Управление',
     },
     auth: {
         logout: 'Выйти',

@@ -87,16 +87,20 @@ function clearAlert() {
     <div class="container-xs">
         <div class="card">
             <div class="registration-header">
-                <div class="registration-icon">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="8.5" cy="7" r="4"/>
-                        <line x1="20" y1="8" x2="20" y2="14"/>
-                        <line x1="23" y1="11" x2="17" y2="11"/>
-                    </svg>
+                <div class="registration-brand">
+                    <div class="registration-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="8.5" cy="7" r="4"/>
+                            <line x1="20" y1="8" x2="20" y2="14"/>
+                            <line x1="23" y1="11" x2="17" y2="11"/>
+                        </svg>
+                    </div>
+                    <div class="registration-title">
+                        <h1>{{ t('registration.title') }}</h1>
+                        <p class="registration-subtitle">{{ t('registration.subtitle') }}</p>
+                    </div>
                 </div>
-                <h1>{{ t('registration.title') }}</h1>
-                <p class="registration-subtitle">{{ t('registration.subtitle') }}</p>
             </div>
 
             <div v-if="alert" class="alert alert-error">
@@ -214,14 +218,19 @@ function clearAlert() {
 
 <style scoped>
 .registration-header {
-    text-align: center;
     margin-bottom: 2rem;
+}
+
+.registration-brand {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
 }
 
 .registration-icon {
     display: flex;
     justify-content: center;
-    margin-bottom: 1rem;
+    flex-shrink: 0;
 }
 
 .registration-icon svg {
@@ -231,10 +240,20 @@ function clearAlert() {
     border-radius: 50%;
 }
 
+.registration-title {
+    text-align: left;
+    min-width: 0;
+}
+
+.registration-title h1 {
+    margin-bottom: 0;
+    text-align: left;
+}
+
 .registration-subtitle {
     color: #6b7280;
     font-size: 1rem;
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
 }
 
 .registration-form {
@@ -294,6 +313,10 @@ function clearAlert() {
 @media (max-width: 480px) {
     .registration-header {
         margin-bottom: 1.5rem;
+    }
+    
+    .registration-brand {
+        gap: 0.75rem;
     }
     
     .registration-icon svg {
