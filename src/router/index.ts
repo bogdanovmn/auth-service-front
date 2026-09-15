@@ -18,7 +18,7 @@ const router = createRouter({
         { path: "/managment",    component: ManagmentPage, meta: { allow: Role.admin } },
         { path: "/logout",       component: LoginPage, meta: { private: true } },
         { path: "/:notFound",    component: ErrorPage },
-        { path: "/",    component: ErrorPage }
+        { path: "/",    component: LoginPage }
     ]
 })
 
@@ -35,11 +35,11 @@ router.beforeEach(
         console.log(`routing to ${to.fullPath} auth: ${isAuthenticated} isAdmin: ${isAdmin}`)
 
         if (targetRole && !tokenStorage.claims?.hasRole(targetRole, 'sso-service')) {
-            return error('Permission denied')
+            return error('errors.permissionDenied')
         }
 
         if (privateTarget && !isAuthenticated) {
-            return error('Permission denied')
+            return error('errors.permissionDenied')
         }
 
         return true;

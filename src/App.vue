@@ -4,8 +4,10 @@
     import { eventBus, Event } from './common/event-bus'
     import { SsoService, tokenStorage } from "@bogdanovmn/ssofw"
     import AuthState from './components/AuthState.vue'
+    import LocaleSwitcher from './components/LocaleSwitcher.vue'
     import { notificationStore } from "./stores/notifications"
     import { authStore } from "./stores/auth"
+    import { t } from './i18n'
 
     const notifStore = notificationStore();
     const auth = authStore()
@@ -24,7 +26,7 @@
             if (auth.isAdmin) {
                 router.push('/managment')
             } else {
-                notifStore.setError("Permission denied")
+                notifStore.setError("errors.permissionDenied")
                 router.push('/error')
             }
         }
@@ -45,7 +47,7 @@
         <nav class="nav">
             <div class="nav-content">
                 <div class="nav-brand">
-                    <h3>Auth Service</h3>
+                    <h3>{{ t('nav.brand') }}</h3>
                 </div>
                 <div class="nav-links">
                     <template v-if="auth.userName">
@@ -55,10 +57,11 @@
                                 <path d="M2 17l10 5 10-5"/>
                                 <path d="M2 12l10 5 10-5"/>
                             </svg>
-                            Management
+                            {{ t('nav.management') }}
                         </router-link>
                     </template>
                     <auth-state :user-name="auth.userName"/>
+                    <locale-switcher/>
                 </div>
             </div>
         </nav>

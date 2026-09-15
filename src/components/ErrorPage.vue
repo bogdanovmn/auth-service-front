@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router';
 
 import { notificationStore } from "../stores/notifications";
+import { t } from "../i18n";
 
 
 const router = useRouter()
@@ -27,13 +28,13 @@ function goHome() {
                         <line x1="9" y1="9" x2="15" y2="15"/>
                     </svg>
                 </div>
-                <h1>Oops! Something went wrong</h1>
-                <p class="error-subtitle">We encountered an unexpected error</p>
+                <h1>{{ t('error.title') }}</h1>
+                <p class="error-subtitle">{{ t('error.subtitle') }}</p>
             </div>
 
             <div class="error-content">
                 <div class="error-message">
-                    <h3>Error Details</h3>
+                    <h3>{{ t('error.details') }}</h3>
                     <div class="error-details">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -52,20 +53,20 @@ function goHome() {
                             <path d="M19 12H5"/>
                             <polyline points="12,19 5,12 12,5"/>
                         </svg>
-                        Go Back
+                        {{ t('error.goBack') }}
                     </button>
                     <button @click="goHome" class="btn btn-primary">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                             <polyline points="9,22 9,12 15,12 15,22"/>
                         </svg>
-                        Go Home
+                        {{ t('error.goHome') }}
                     </button>
                 </div>
             </div>
 
             <div class="error-footer">
-                <p>If this problem persists, please contact support.</p>
+                <p>{{ t('error.footer') }}</p>
             </div>
         </div>
     </div>

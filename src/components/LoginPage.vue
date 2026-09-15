@@ -5,6 +5,7 @@
     import { useRoute } from 'vue-router';
     import { authStore } from "../stores/auth"
     import router from '../router';
+    import { t } from '../i18n';
 
 
     const auth = authStore()
@@ -60,17 +61,17 @@
         console.error('Login error:', err)
         
         if (err?.response?.status === 404) {
-            error.value = "User not found. Please check your email and password."
+            error.value = t('login.userNotFound')
         } else if (err?.response?.status === 401) {
-            error.value = "Invalid credentials. Please check your email and password."
+            error.value = t('login.invalidCredentials')
         } else if (err?.response?.status === 403) {
-            error.value = "Access denied. Your account may be disabled."
+            error.value = t('login.accessDenied')
         } else if (err?.response?.status >= 500) {
-            error.value = "Server error. Please try again later."
+            error.value = t('login.serverError')
         } else if (err?.code === 'NETWORK_ERROR' || !navigator.onLine) {
-            error.value = "Network error. Please check your internet connection."
+            error.value = t('login.networkError')
         } else {
-            error.value = "Login failed. Please try again."
+            error.value = t('login.failed')
         }
     }
 
@@ -93,8 +94,8 @@
                         <line x1="15" y1="12" x2="3" y2="12"/>
                     </svg>
                 </div>
-                <h1>Welcome Back</h1>
-                <p class="login-subtitle">Sign in to your account to continue</p>
+                <h1>{{ t('login.welcome') }}</h1>
+                <p class="login-subtitle">{{ t('login.subtitle') }}</p>
             </div>
 
             <div v-if="error" class="alert alert-error">
@@ -113,13 +114,13 @@
                             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                             <polyline points="22,6 12,13 2,6"/>
                         </svg>
-                        Email Address
+                        {{ t('login.emailLabel') }}
                     </label>
                     <input 
                         id="email"
                         type="email" 
                         class="form-input" 
-                        placeholder="Enter your email" 
+                        :placeholder="t('login.emailPlaceholder')" 
                         v-model="email"
                         @input="clearError"
                         required
@@ -134,13 +135,13 @@
                             <circle cx="12" cy="16" r="1"/>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                         </svg>
-                        Password
+                        {{ t('login.passwordLabel') }}
                     </label>
                     <input 
                         id="password"
                         type="password" 
                         class="form-input" 
-                        placeholder="Enter your password" 
+                        :placeholder="t('login.passwordPlaceholder')" 
                         v-model="password"
                         @input="clearError"
                         required
@@ -155,13 +156,13 @@
                         <polyline points="10,17 15,12 10,7"/>
                         <line x1="15" y1="12" x2="3" y2="12"/>
                     </svg>
-                    {{ isLoading ? 'Signing In...' : 'Sign In' }}
+                    {{ isLoading ? t('login.signingIn') : t('login.signIn') }}
                 </button>
             </form>
 
             <div class="login-footer">
-                <p>Don't have an account? 
-                    <router-link to="/registration" class="link">Create one here</router-link>
+                <p>{{ t('login.noAccount') }} 
+                    <router-link to="/registration" class="link">{{ t('login.createOne') }}</router-link>
                 </p>
             </div>
         </div>

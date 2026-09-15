@@ -1,19 +1,20 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { t } from '../i18n';
 
 export const notificationStore = defineStore('notificationStore', () => {
-  const errorMsg = ref<string|null>(null);
+  const errorKey = ref<string | null>(null);
 
-  function setError(msg: string) {
-    errorMsg.value = msg;
+  function setError(key: string) {
+    errorKey.value = key;
   }
 
   function clearError() {
-    errorMsg.value = null;
+    errorKey.value = null;
   }
 
   function getError() {
-    return errorMsg.value || 'An unexpected error occurred';
+    return t(errorKey.value ?? 'errors.default');
   }
 
   return {

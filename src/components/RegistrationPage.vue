@@ -3,6 +3,7 @@ import { ref, inject } from 'vue'
 import { eventBus, Event } from '../common/event-bus'
 import { SsoService } from "@bogdanovmn/ssofw"
 import { authStore } from "../stores/auth"
+import { t } from "../i18n"
 
 
 const auth = authStore()
@@ -20,16 +21,16 @@ function signupWithPassword() {
     isLoading.value = true
 
     if (!name.value) {
-        alert.value = "Name must be specified"
+        alert.value = t('registration.nameRequired')
         isLoading.value = false
     } else if (!email.value) {
-        alert.value = "Email must be specified"
+        alert.value = t('registration.emailRequired')
         isLoading.value = false
     } else if (!password.value) {
-        alert.value = "Password must be specified"
+        alert.value = t('registration.passwordRequired')
         isLoading.value = false
     } else if (password.value != passwordCheck.value) {
-        alert.value = "Passwords must be matched"
+        alert.value = t('registration.passwordMismatch')
         isLoading.value = false
     } else {
         ssoService.createAccount({
@@ -62,15 +63,15 @@ function handleRegistrationError(err: any) {
     console.error('Registration error:', err)
     
     if (err?.response?.status === 409) {
-        alert.value = "An account with this email already exists."
+        alert.value = t('registration.emailExists')
     } else if (err?.response?.status === 400) {
-        alert.value = "Invalid registration data. Please check your information."
+        alert.value = t('registration.invalidData')
     } else if (err?.response?.status >= 500) {
-        alert.value = "Server error. Please try again later."
+        alert.value = t('registration.serverError')
     } else if (err?.code === 'NETWORK_ERROR' || !navigator.onLine) {
-        alert.value = "Network error. Please check your internet connection."
+        alert.value = t('registration.networkError')
     } else {
-        alert.value = "Registration failed. Please try again."
+        alert.value = t('registration.failed')
     }
 }
 
@@ -94,8 +95,8 @@ function clearAlert() {
                         <line x1="23" y1="11" x2="17" y2="11"/>
                     </svg>
                 </div>
-                <h1>Create Account</h1>
-                <p class="registration-subtitle">Join us today and get started</p>
+                <h1>{{ t('registration.title') }}</h1>
+                <p class="registration-subtitle">{{ t('registration.subtitle') }}</p>
             </div>
 
             <div v-if="alert" class="alert alert-error">
@@ -114,13 +115,13 @@ function clearAlert() {
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                             <circle cx="12" cy="7" r="4"/>
                         </svg>
-                        Full Name
+                        {{ t('registration.nameLabel') }}
                     </label>
                     <input 
                         id="name"
                         type="text" 
                         class="form-input" 
-                        placeholder="Enter your full name" 
+                        :placeholder="t('registration.namePlaceholder')" 
                         v-model="name"
                         @input="clearAlert"
                         required
@@ -134,13 +135,13 @@ function clearAlert() {
                             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                             <polyline points="22,6 12,13 2,6"/>
                         </svg>
-                        Email Address
+                        {{ t('registration.emailLabel') }}
                     </label>
                     <input 
                         id="email"
                         type="email" 
                         class="form-input" 
-                        placeholder="Enter your email" 
+                        :placeholder="t('registration.emailPlaceholder')" 
                         v-model="email"
                         @input="clearAlert"
                         required
@@ -155,13 +156,13 @@ function clearAlert() {
                             <circle cx="12" cy="16" r="1"/>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                         </svg>
-                        Password
+                        {{ t('registration.passwordLabel') }}
                     </label>
                     <input 
                         id="password"
                         type="password" 
                         class="form-input" 
-                        placeholder="Create a strong password" 
+                        :placeholder="t('registration.passwordPlaceholder')" 
                         v-model="password"
                         @input="clearAlert"
                         required
@@ -176,13 +177,13 @@ function clearAlert() {
                             <circle cx="12" cy="16" r="1"/>
                             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                         </svg>
-                        Confirm Password
+                        {{ t('registration.confirmLabel') }}
                     </label>
                     <input 
                         id="passwordCheck"
                         type="password" 
                         class="form-input" 
-                        placeholder="Confirm your password" 
+                        :placeholder="t('registration.confirmPlaceholder')" 
                         v-model="passwordCheck"
                         @input="clearAlert"
                         required
@@ -198,13 +199,13 @@ function clearAlert() {
                         <line x1="20" y1="8" x2="20" y2="14"/>
                         <line x1="23" y1="11" x2="17" y2="11"/>
                     </svg>
-                    {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+                    {{ isLoading ? t('registration.creatingAccount') : t('registration.createAccount') }}
                 </button>
             </form>
 
             <div class="registration-footer">
-                <p>Already have an account? 
-                    <router-link to="/login" class="link">Sign in here</router-link>
+                <p>{{ t('registration.haveAccount') }} 
+                    <router-link to="/login" class="link">{{ t('registration.signInHere') }}</router-link>
                 </p>
             </div>
         </div>

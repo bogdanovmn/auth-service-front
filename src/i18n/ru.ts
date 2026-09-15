@@ -1,0 +1,84 @@
+function pluralRu(count: number, one: string, few: string, many: string): string {
+    const mod10 = count % 10;
+    const mod100 = count % 100;
+    if (mod10 === 1 && mod100 !== 11) return one;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+    return many;
+}
+
+export default {
+    nav: {
+        brand: 'Единая Дверь',
+        management: 'Управление',
+    },
+    auth: {
+        logout: 'Выйти',
+    },
+    errors: {
+        default: 'Произошла непредвиденная ошибка',
+        permissionDenied: 'Отказано в доступе',
+    },
+    error: {
+        title: 'Упс! Что-то пошло не так',
+        subtitle: 'Произошла непредвиденная ошибка',
+        details: 'Детали ошибки',
+        goBack: 'Назад',
+        goHome: 'На главную',
+        footer: 'Если проблема сохраняется, обратитесь в службу поддержки.',
+    },
+    login: {
+        welcome: 'С возвращением',
+        subtitle: 'Войдите в аккаунт, чтобы продолжить',
+        emailLabel: 'Электронная почта',
+        emailPlaceholder: 'Введите email',
+        passwordLabel: 'Пароль',
+        passwordPlaceholder: 'Введите пароль',
+        signingIn: 'Вход...',
+        signIn: 'Войти',
+        noAccount: 'Нет аккаунта?',
+        createOne: 'Создайте его здесь',
+        userNotFound: 'Пользователь не найден. Проверьте email и пароль.',
+        invalidCredentials: 'Неверные данные. Проверьте email и пароль.',
+        accessDenied: 'Доступ запрещён. Возможно, ваш аккаунт отключён.',
+        serverError: 'Ошибка сервера. Попробуйте позже.',
+        networkError: 'Ошибка сети. Проверьте подключение к интернету.',
+        failed: 'Не удалось войти. Попробуйте ещё раз.',
+    },
+    registration: {
+        title: 'Создать аккаунт',
+        subtitle: 'Присоединяйтесь к нам уже сегодня',
+        nameLabel: 'Полное имя',
+        namePlaceholder: 'Введите полное имя',
+        emailLabel: 'Электронная почта',
+        emailPlaceholder: 'Введите email',
+        passwordLabel: 'Пароль',
+        passwordPlaceholder: 'Придумайте надёжный пароль',
+        confirmLabel: 'Подтвердите пароль',
+        confirmPlaceholder: 'Подтвердите пароль',
+        creatingAccount: 'Создание аккаунта...',
+        createAccount: 'Создать аккаунт',
+        haveAccount: 'Уже есть аккаунт?',
+        signInHere: 'Войдите здесь',
+        emailExists: 'Аккаунт с таким email уже существует.',
+        invalidData: 'Некорректные данные регистрации. Проверьте информацию.',
+        serverError: 'Ошибка сервера. Попробуйте позже.',
+        networkError: 'Ошибка сети. Проверьте подключение к интернету.',
+        failed: 'Не удалось зарегистрироваться. Попробуйте ещё раз.',
+        nameRequired: 'Необходимо указать имя',
+        emailRequired: 'Необходимо указать email',
+        passwordRequired: 'Необходимо указать пароль',
+        passwordMismatch: 'Пароли не совпадают',
+    },
+    management: {
+        dashboard: 'Панель управления',
+        welcomeBack: 'С возвращением, {name}',
+        appsOverview: 'Обзор приложений',
+        subtitle: 'Управляйте и контролируйте свои приложения',
+        loading: 'Загрузка приложений...',
+        noAppsTitle: 'Приложения не найдены',
+        noAppsText: 'Сейчас нет приложений для отображения.',
+        rolesPermissions: 'Роли и разрешения',
+        usersCount: (params: { count: number }) => `${params.count} ${pluralRu(params.count, 'пользователь', 'пользователя', 'пользователей')}`,
+        noRoles: 'Роли не назначены',
+    },
+};

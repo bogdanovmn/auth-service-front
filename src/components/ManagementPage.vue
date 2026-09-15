@@ -2,6 +2,7 @@
     import { ref, inject } from 'vue'
     import { ApplictionsOverview, SsoResourcesService } from '../common/sso-resources-service';
     import { tokenStorage } from "@bogdanovmn/ssofw"
+    import { t } from '../i18n'
 
 
     const ssoResourceService = inject<SsoResourcesService>("ssoResourceService")!
@@ -14,31 +15,15 @@
 
 <template>
     <div class="container">
-        <div class="management-header">
-            <div class="welcome-section">
-                <div class="welcome-icon">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                        <path d="M2 17l10 5 10-5"/>
-                        <path d="M2 12l10 5 10-5"/>
-                    </svg>
-                </div>
-                <div class="welcome-content">
-                    <h1>Management Dashboard</h1>
-                    <p class="welcome-message">Welcome back, <strong>{{ tokenStorage.claims?.userName }}</strong></p>
-                </div>
-            </div>
-        </div>
-
         <div class="card">
             <div class="section-header">
-                <h2>Applications Overview</h2>
-                <p class="section-subtitle">Manage and monitor your applications</p>
+                <h2>{{ t('management.appsOverview') }}</h2>
+                <p class="section-subtitle">{{ t('management.subtitle') }}</p>
             </div>
 
             <div v-if="!data" class="loading-state">
                 <div class="loading"></div>
-                <p>Loading applications...</p>
+                <p>{{ t('management.loading') }}</p>
             </div>
 
             <div v-else-if="data.length === 0" class="empty-state">
@@ -47,8 +32,8 @@
                     <path d="M2 17l10 5 10-5"/>
                     <path d="M2 12l10 5 10-5"/>
                 </svg>
-                <h3>No Applications Found</h3>
-                <p>There are no applications to display at the moment.</p>
+                <h3>{{ t('management.noAppsTitle') }}</h3>
+                <p>{{ t('management.noAppsText') }}</p>
             </div>
 
             <div v-else class="applications-grid">
@@ -65,12 +50,12 @@
                     </div>
 
                     <div v-if="app.roles.length > 0" class="app-roles">
-                        <h4 class="roles-title">Roles & Permissions</h4>
+                        <h4 class="roles-title">{{ t('management.rolesPermissions') }}</h4>
                         <div class="roles-list">
                             <div v-for="role in app.roles" :key="role.name" class="role-item">
                                 <div class="role-info">
                                     <span class="role-name">{{ role.name }}</span>
-                                    <span class="role-count">{{ role.usersCount }} users</span>
+                                    <span class="role-count">{{ t('management.usersCount', { count: role.usersCount }) }}</span>
                                 </div>
                                 <div class="role-indicator"></div>
                             </div>
@@ -83,7 +68,7 @@
                             <line x1="15" y1="9" x2="9" y2="15"/>
                             <line x1="9" y1="9" x2="15" y2="15"/>
                         </svg>
-                        <span>No roles assigned</span>
+                        <span>{{ t('management.noRoles') }}</span>
                     </div>
                 </div>
             </div>

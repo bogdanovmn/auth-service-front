@@ -277,13 +277,14 @@ h3 {
   }
   
   .nav-content {
-    flex-direction: column;
-    gap: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
   
   .nav-links {
     flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-end;
+    margin-left: auto;
   }
   
   .btn {
