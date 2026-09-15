@@ -17,7 +17,7 @@ const authHttpClient = new AuthHttpClient(
         router.push("/logout")
     }
 )
-const ssoResourceService = new SsoResourcesService(import.meta.env.VITE_SSO_SERVICE_URL, authHttpClient)
+const ssoResourceService = new SsoResourcesService(authHttpClient)
 
 createApp(App)
     .use(createPinia())

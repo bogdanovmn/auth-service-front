@@ -14,17 +14,15 @@ type RoleStat = {
 
 
 export class SsoResourcesService {
-    private url: string
     private retryableClient: AuthHttpClient
 
-    constructor(url: string, retryableClient: AuthHttpClient) {
-        this.url = url
+    constructor(retryableClient: AuthHttpClient) {
         this.retryableClient = retryableClient
     }
 
     public applicationsOverview(): Promise<ApplictionsOverview[]> {
         return this.retryableClient.get<ApplictionsOverview[]>(
-            `${this.url}/applications`
+            '/applications'
         )
     }
 }
