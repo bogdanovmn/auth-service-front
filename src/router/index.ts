@@ -4,6 +4,8 @@ import RegistrationPage from '../components/RegistrationPage.vue'
 import LoginPage from '../components/LoginPage.vue'
 import ManagmentPage from './../components/ManagementPage.vue'
 import UsersPage from './../components/UsersPage.vue'
+import UserActivityPage from './../components/UserActivityPage.vue'
+import LoginAttemptsPage from './../components/LoginAttemptsPage.vue'
 import PasswordResetPage from './../components/PasswordResetPage.vue'
 import ErrorPage from './../components/ErrorPage.vue'
 
@@ -20,6 +22,8 @@ const router = createRouter({
         { path: "/password-reset", component: PasswordResetPage },
         { path: "/managment",    component: ManagmentPage, meta: { allow: Role.admin } },
         { path: "/users",        component: UsersPage, meta: { allow: Role.admin } },
+        { path: "/users/:id/activity", component: UserActivityPage, meta: { allow: Role.admin } },
+        { path: "/login-attempts", component: LoginAttemptsPage, meta: { allow: Role.admin } },
         { path: "/logout",       component: LoginPage, meta: { private: true } },
         { path: "/:notFound",    component: ErrorPage },
         { path: "/",    component: LoginPage }

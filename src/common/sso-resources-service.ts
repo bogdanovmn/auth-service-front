@@ -23,6 +23,31 @@ export type PasswordResetLink = {
     ttlInMinutes: number;
 }
 
+export type UserActivityEvent = {
+    id: string;
+    type: string;
+    ip: string | null;
+    userAgent: string | null;
+    createdAt: string;
+}
+
+export type UserActivity = {
+    account: {
+        id: string;
+        name: string;
+        email: string;
+    }
+    events: UserActivityEvent[]
+}
+
+export type LoginAttempt = {
+    id: string;
+    email: string;
+    ip: string | null;
+    userAgent: string | null;
+    createdAt: string;
+}
+
 type RoleStat = {
     name: string;
     usersCount: number;
@@ -51,6 +76,18 @@ export class SsoResourcesService {
     public createPasswordResetLink(userId: string): Promise<PasswordResetLink> {
         return this.retryableClient.post<PasswordResetLink>(
             `/users/${userId}/password-reset`
+        )
+    }
+
+    public userActivity(userId: string): Promise<UserActivity> {
+        return this.retryableClient.get<UserActivity>(
+            `/users/${userId}/activity`
+        )
+    }
+
+    public loginAttempts(): Promise<LoginAttempt[]> {
+        return this.retryableClient.get<LoginAttempt[]>(
+            '/login-attempts'
         )
     }
 

@@ -7,6 +7,7 @@
     const tabs = [
         { to: '/managment', label: t('nav.applications') },
         { to: '/users', label: t('nav.users') },
+        { to: '/login-attempts', label: t('nav.loginAttempts') },
     ]
 </script>
 

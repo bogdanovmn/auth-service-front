@@ -1,11 +1,13 @@
 <script setup lang="ts">
     import { ref, inject } from 'vue'
+    import { useRouter } from 'vue-router'
     import { SsoResourcesService, UserRecord, PasswordResetLink } from '../common/sso-resources-service';
     import { t } from '../i18n'
     import AdminTabs from './AdminTabs.vue'
 
 
     const ssoResourceService = inject<SsoResourcesService>("ssoResourceService")!
+    const router = useRouter()
 
     const data = ref<UserRecord[]>()
     const alert = ref("")
@@ -43,6 +45,10 @@
 
     function buildResetLink(token: string): string {
         return `${window.location.origin}/sso/password-reset?token=${token}`
+    }
+
+    function openActivity(user: UserRecord) {
+        router.push(`/users/${user.id}/activity`)
     }
 
     async function copyLink() {
@@ -149,6 +155,16 @@
                                 <span class="date-short">{{ formatShortDate(user.updatedAt) }}</span>
                             </td>
                             <td class="cell-actions">
+                                <button
+                                    class="icon-btn"
+                                    :title="t('users.activity')"
+                                    :aria-label="t('users.activity')"
+                                    @click="openActivity(user)"
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                                    </svg>
+                                </button>
                                 <button
                                     class="icon-btn"
                                     :title="t('users.generateLink')"
@@ -319,6 +335,13 @@
     text-align: center;
     white-space: nowrap;
     width: 1%;
+}
+
+.cell-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 .status-badge {
@@ -517,6 +540,13 @@
         width: auto;
         order: 2;
         margin-left: auto;
+    }
+
+    .users-table td.cell-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.375rem;
     }
 
     .status-badge {
