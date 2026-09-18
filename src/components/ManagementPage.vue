@@ -3,6 +3,7 @@
     import { ApplictionsOverview, SsoResourcesService } from '../common/sso-resources-service';
     import { tokenStorage } from "@bogdanovmn/ssofw"
     import { t } from '../i18n'
+    import AdminTabs from './AdminTabs.vue'
 
 
     const ssoResourceService = inject<SsoResourcesService>("ssoResourceService")!
@@ -16,6 +17,8 @@
 <template>
     <div class="container">
         <div class="card">
+            <admin-tabs/>
+
             <div class="section-header">
                 <h2>{{ t('management.appsOverview') }}</h2>
                 <p class="section-subtitle">{{ t('management.subtitle') }}</p>

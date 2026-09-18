@@ -3,6 +3,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import RegistrationPage from '../components/RegistrationPage.vue'
 import LoginPage from '../components/LoginPage.vue'
 import ManagmentPage from './../components/ManagementPage.vue'
+import UsersPage from './../components/UsersPage.vue'
+import PasswordResetPage from './../components/PasswordResetPage.vue'
 import ErrorPage from './../components/ErrorPage.vue'
 
 import { tokenStorage, Role } from "@bogdanovmn/ssofw"
@@ -15,7 +17,9 @@ const router = createRouter({
         { path: "/error",        component: ErrorPage },
         { path: "/login",        component: LoginPage },
         { path: "/registration", component: RegistrationPage },
+        { path: "/password-reset", component: PasswordResetPage },
         { path: "/managment",    component: ManagmentPage, meta: { allow: Role.admin } },
+        { path: "/users",        component: UsersPage, meta: { allow: Role.admin } },
         { path: "/logout",       component: LoginPage, meta: { private: true } },
         { path: "/:notFound",    component: ErrorPage },
         { path: "/",    component: LoginPage }
