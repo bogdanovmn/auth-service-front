@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { ref, inject } from 'vue'
+    import { ref, computed, inject } from 'vue'
     import { ApplictionsOverview, SsoResourcesService } from '../common/sso-resources-service';
     import { t } from '../i18n'
     import AdminTabs from './AdminTabs.vue'
@@ -14,10 +14,40 @@
         url: string
     }
 
+    type AddForm = {
+        name: string
+        roles: string[]
+    }
+
+    const roleOptions = [
+        { value: 'user', label: t('management.roleNameUser') },
+        { value: 'admin', label: t('management.roleNameAdmin') },
+        { value: 'moderator', label: t('management.roleNameModerator') },
+    ]
+
     const data = ref<ApplictionsOverview[]>()
     const alert = ref("")
     const editModal = ref<EditForm | null>(null)
+    const addModal = ref<AddForm | null>(null)
+    const deleteModal = ref<ApplictionsOverview | null>(null)
     const isSaving = ref(false)
+    const isDeleting = ref(false)
+
+    const activeTab = ref<'active' | 'inactive'>('active')
+
+    const activeApps = computed(() => (data.value ?? []).filter(app => app.active))
+    const inactiveApps = computed(() => (data.value ?? []).filter(app => !app.active))
+    const showTabs = computed(() => activeApps.value.length > 0 && inactiveApps.value.length > 0)
+    const visibleApps = computed(() => {
+        if (showTabs.value) {
+            return activeTab.value === 'active' ? activeApps.value : inactiveApps.value
+        }
+        return activeApps.value.length > 0 ? activeApps.value : inactiveApps.value
+    })
+
+    function isSystemApp(app: ApplictionsOverview): boolean {
+        return app.name === 'any'
+    }
 
     load()
 
@@ -47,10 +77,15 @@
 
     function saveEdit() {
         if (!editModal.value) return
+        const name = editModal.value.name.trim()
+        if (name.toLowerCase() === 'any') {
+            alert.value = t('management.systemNameRestricted')
+            return
+        }
         isSaving.value = true
         alert.value = ""
         ssoResourceService.updateApplication(editModal.value.id, {
-            name: editModal.value.name.trim(),
+            name: name,
             shortDescription: editModal.value.shortDescription.trim() || null,
             url: editModal.value.url.trim() || null
         })
@@ -66,6 +101,72 @@
                 isSaving.value = false
             })
     }
+
+    function openAdd() {
+        alert.value = ""
+        addModal.value = { name: '', roles: [] }
+    }
+
+    function closeAdd() {
+        if (isSaving.value) return
+        addModal.value = null
+    }
+
+    function saveAdd() {
+        if (!addModal.value) return
+        const name = addModal.value.name.trim()
+        if (name.toLowerCase() === 'any') {
+            alert.value = t('management.systemNameRestricted')
+            return
+        }
+        isSaving.value = true
+        alert.value = ""
+        ssoResourceService.createApplication({
+            name: name,
+            roles: addModal.value.roles
+        })
+            .then(() => {
+                isSaving.value = false
+                closeAdd()
+                load()
+            })
+            .catch(err => {
+                console.error('Create application error:', err)
+                alert.value = t('management.addFailed')
+            })
+            .finally(() => {
+                isSaving.value = false
+            })
+    }
+
+    function openDelete(app: ApplictionsOverview) {
+        alert.value = ""
+        deleteModal.value = app
+    }
+
+    function closeDelete() {
+        if (isDeleting.value) return
+        deleteModal.value = null
+    }
+
+    function confirmDelete() {
+        if (!deleteModal.value) return
+        isDeleting.value = true
+        alert.value = ""
+        ssoResourceService.deactivateApplication(deleteModal.value.id)
+            .then(() => {
+                isDeleting.value = false
+                closeDelete()
+                load()
+            })
+            .catch(err => {
+                console.error('Deactivate application error:', err)
+                alert.value = t('management.deleteFailed')
+            })
+            .finally(() => {
+                isDeleting.value = false
+            })
+    }
 </script>
 
 <template>
@@ -76,6 +177,15 @@
             <div class="section-header">
                 <h2>{{ t('management.appsOverview') }}</h2>
                 <p class="section-subtitle">{{ t('management.subtitle') }}</p>
+                <div class="header-actions">
+                    <button class="btn btn-primary btn-sm" @click="openAdd">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        {{ t('management.add') }}
+                    </button>
+                </div>
             </div>
 
             <div v-if="alert" class="alert alert-error">
@@ -85,6 +195,21 @@
                     <line x1="9" y1="9" x2="15" y2="15"/>
                 </svg>
                 {{ alert }}
+            </div>
+
+            <div v-if="data && showTabs" class="status-tabs-wrap">
+                <div class="status-tabs">
+                    <button
+                        class="status-tab"
+                        :class="{ active: activeTab === 'active' }"
+                        @click="activeTab = 'active'"
+                    >{{ t('management.tabActive', { count: activeApps.length }) }}</button>
+                    <button
+                        class="status-tab"
+                        :class="{ active: activeTab === 'inactive' }"
+                        @click="activeTab = 'inactive'"
+                    >{{ t('management.tabInactive', { count: inactiveApps.length }) }}</button>
+                </div>
             </div>
 
             <div v-if="!data" class="loading-state">
@@ -103,7 +228,7 @@
             </div>
 
             <div v-else class="applications-grid">
-                <div v-for="app in data" :key="app.name" class="app-card">
+                <div v-for="app in visibleApps" :key="app.name" class="app-card" :class="{ 'app-card-inactive': !app.active }">
                     <div class="app-header">
                         <div class="app-icon">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -113,17 +238,37 @@
                             </svg>
                         </div>
                         <h3 class="app-name">{{ app.name }}</h3>
-                        <button
-                            class="icon-btn edit-btn"
-                            :title="t('management.edit')"
-                            :aria-label="t('management.edit')"
-                            @click="openEdit(app)"
-                        >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M12 20h9"/>
-                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/>
-                            </svg>
-                        </button>
+                        <span v-if="isSystemApp(app)" class="system-badge">{{ t('management.systemApp') }}</span>
+                        <span v-if="!app.active" class="inactive-badge">{{ t('management.inactive') }}</span>
+                        <div class="app-actions">
+                            <button
+                                v-if="!isSystemApp(app)"
+                                class="icon-btn edit-btn"
+                                :title="t('management.edit')"
+                                :aria-label="t('management.edit')"
+                                @click="openEdit(app)"
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 20h9"/>
+                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4z"/>
+                                </svg>
+                            </button>
+                            <button
+                                v-if="app.active && !isSystemApp(app)"
+                                class="icon-btn delete-btn"
+                                :title="t('management.delete')"
+                                :aria-label="t('management.delete')"
+                                @click="openDelete(app)"
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 6h18"/>
+                                    <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                                    <line x1="10" y1="11" x2="10" y2="17"/>
+                                    <line x1="14" y1="11" x2="14" y2="17"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <p v-if="app.shortDescription" class="app-description">{{ app.shortDescription }}</p>
@@ -221,6 +366,83 @@
                 </form>
             </div>
         </div>
+
+        <div v-if="addModal" class="modal-overlay" @click.self="closeAdd">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </div>
+                    <h3>{{ t('management.addModalTitle') }}</h3>
+                    <p class="modal-subtitle">{{ t('management.addModalText') }}</p>
+                </div>
+
+                <form @submit.prevent="saveAdd">
+                    <div class="form-group">
+                        <label class="form-label" for="new-app-name">{{ t('management.nameLabel') }}</label>
+                        <input
+                            id="new-app-name"
+                            type="text"
+                            class="form-input"
+                            v-model="addModal.name"
+                            :placeholder="t('management.namePlaceholder')"
+                            required
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">{{ t('management.rolesLabel') }}</label>
+                        <div class="role-options">
+                            <label v-for="option in roleOptions" :key="option.value" class="role-option">
+                                <input type="checkbox" :value="option.value" v-model="addModal.roles" />
+                                <span>{{ option.label }}</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-primary btn-sm" :disabled="isSaving">
+                            <div v-if="isSaving" class="loading"></div>
+                            {{ isSaving ? t('management.saving') : t('management.add') }}
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" @click="closeAdd" :disabled="isSaving">
+                            {{ t('management.cancel') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div v-if="deleteModal" class="modal-overlay" @click.self="closeDelete">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-icon modal-icon-danger">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"/>
+                            <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>
+                            <line x1="10" y1="11" x2="10" y2="17"/>
+                            <line x1="14" y1="11" x2="14" y2="17"/>
+                        </svg>
+                    </div>
+                    <h3>{{ t('management.deleteModalTitle') }}</h3>
+                    <p class="modal-subtitle">{{ t('management.deleteModalText', { name: deleteModal.name }) }}</p>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-danger btn-sm" @click="confirmDelete" :disabled="isDeleting">
+                        <div v-if="isDeleting" class="loading"></div>
+                        {{ isDeleting ? t('management.saving') : t('management.delete') }}
+                    </button>
+                    <button class="btn btn-secondary btn-sm" @click="closeDelete" :disabled="isDeleting">
+                        {{ t('management.cancel') }}
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -265,8 +487,20 @@
 }
 
 .section-header {
+    position: relative;
     margin-bottom: 2rem;
     text-align: center;
+}
+
+.section-header h2 {
+    margin-bottom: 0.5rem;
+}
+
+.header-actions {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
 }
 
 .section-subtitle {
@@ -344,13 +578,20 @@
     color: #374151;
 }
 
+.app-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
 .edit-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 36px;
     height: 36px;
-    margin-left: auto;
     border: none;
     border-radius: 10px;
     background: rgba(102, 126, 234, 0.1);
@@ -364,6 +605,102 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     transform: translateY(-1px);
+}
+
+.delete-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.inactive-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+    background: rgba(239, 68, 68, 0.12);
+    color: #b91c1c;
+}
+
+.system-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.4;
+    white-space: nowrap;
+    background: rgba(107, 114, 128, 0.12);
+    color: #4b5563;
+}
+
+.app-card-inactive {
+    background: rgba(107, 114, 128, 0.04);
+    border-style: dashed;
+    border-color: rgba(107, 114, 128, 0.35);
+}
+
+.app-card-inactive:hover {
+    background: rgba(107, 114, 128, 0.07);
+    border-color: rgba(107, 114, 128, 0.45);
+    transform: none;
+}
+
+.status-tabs-wrap {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.status-tabs {
+    display: inline-flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    background: rgba(102, 126, 234, 0.08);
+    border: 1px solid rgba(102, 126, 234, 0.12);
+    border-radius: 12px;
+}
+
+.status-tab {
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.status-tab:hover {
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.06);
+}
+
+.status-tab.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .app-description {
@@ -432,6 +769,44 @@
     background: rgba(102, 126, 234, 0.1);
     padding: 0.75rem;
     border-radius: 50%;
+}
+
+.modal-icon-danger svg {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.role-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.role-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.role-option:hover {
+    background: rgba(102, 126, 234, 0.06);
+    border-color: rgba(102, 126, 234, 0.3);
+}
+
+.role-option input {
+    accent-color: #667eea;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
 }
 
 .modal-subtitle {
@@ -529,6 +904,14 @@
     .welcome-content h1 {
         text-align: center;
         font-size: 1.75rem;
+    }
+
+    .header-actions {
+        position: static;
+        transform: none;
+        margin-top: 1rem;
+        display: flex;
+        justify-content: center;
     }
     
     .applications-grid {

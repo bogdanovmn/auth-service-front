@@ -7,6 +7,7 @@ export type ApplictionsOverview = {
     name: string;
     shortDescription: string | null;
     url: string | null;
+    active: boolean;
     roles: RoleStat[]
 }
 
@@ -67,6 +68,11 @@ export type UpdateApplicationRequest = {
     url: string | null;
 }
 
+export type NewApplicationRequest = {
+    name: string;
+    roles: string[];
+}
+
 
 export class SsoResourcesService {
     private retryableClient: AuthHttpClient
@@ -91,6 +97,19 @@ export class SsoResourcesService {
         return this.retryableClient.put<void>(
             `/applications/${id}`,
             app
+        )
+    }
+
+    public createApplication(app: NewApplicationRequest): Promise<void> {
+        return this.retryableClient.post<void>(
+            '/applications',
+            app
+        )
+    }
+
+    public deactivateApplication(id: number): Promise<void> {
+        return this.retryableClient.delete<void>(
+            `/applications/${id}`
         )
     }
 
