@@ -5,7 +5,15 @@ import axios from "axios"
 export type ApplictionsOverview = {
     id: number;
     name: string;
+    shortDescription: string | null;
+    url: string | null;
     roles: RoleStat[]
+}
+
+export type AvailableService = {
+    name: string;
+    shortDescription: string | null;
+    url: string;
 }
 
 export type UserRecord = {
@@ -53,6 +61,12 @@ type RoleStat = {
     usersCount: number;
 }
 
+export type UpdateApplicationRequest = {
+    name: string;
+    shortDescription: string | null;
+    url: string | null;
+}
+
 
 export class SsoResourcesService {
     private retryableClient: AuthHttpClient
@@ -64,6 +78,19 @@ export class SsoResourcesService {
     public applicationsOverview(): Promise<ApplictionsOverview[]> {
         return this.retryableClient.get<ApplictionsOverview[]>(
             '/applications'
+        )
+    }
+
+    public availableServices(): Promise<AvailableService[]> {
+        return this.retryableClient.get<AvailableService[]>(
+            '/applications/public'
+        )
+    }
+
+    public updateApplication(id: number, app: UpdateApplicationRequest): Promise<void> {
+        return this.retryableClient.put<void>(
+            `/applications/${id}`,
+            app
         )
     }
 

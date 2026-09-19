@@ -5,11 +5,9 @@
     import { SsoService, tokenStorage } from "@bogdanovmn/ssofw"
     import AuthState from './components/AuthState.vue'
     import LocaleSwitcher from './components/LocaleSwitcher.vue'
-    import { notificationStore } from "./stores/notifications"
     import { authStore } from "./stores/auth"
     import { t } from './i18n'
 
-    const notifStore = notificationStore();
     const auth = authStore()
     const ssoService = inject<SsoService>("ssoService")!
 
@@ -26,8 +24,7 @@
             if (auth.isAdmin) {
                 router.push('/managment')
             } else {
-                notifStore.setError("errors.permissionDenied")
-                router.push('/error')
+                router.push('/lost')
             }
         }
     });

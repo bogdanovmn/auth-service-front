@@ -8,6 +8,7 @@ import UserActivityPage from './../components/UserActivityPage.vue'
 import LoginAttemptsPage from './../components/LoginAttemptsPage.vue'
 import PasswordResetPage from './../components/PasswordResetPage.vue'
 import ErrorPage from './../components/ErrorPage.vue'
+import LostPage from './../components/LostPage.vue'
 
 import { tokenStorage, Role } from "@bogdanovmn/ssofw"
 import { notificationStore } from "../stores/notifications"
@@ -25,6 +26,7 @@ const router = createRouter({
         { path: "/users/:id/activity", component: UserActivityPage, meta: { allow: Role.admin } },
         { path: "/login-attempts", component: LoginAttemptsPage, meta: { allow: Role.admin } },
         { path: "/logout",       component: LoginPage, meta: { private: true } },
+        { path: "/lost",        component: LostPage, meta: { private: true } },
         { path: "/:notFound",    component: ErrorPage },
         { path: "/",    component: LoginPage }
     ]
@@ -44,6 +46,10 @@ router.beforeEach(
 
         if (targetRole && !tokenStorage.claims?.hasRole(targetRole, 'sso-service')) {
             return error('errors.permissionDenied')
+        }
+
+        if (to.path === '/' && isAuthenticated && !to.query.from) {
+            return isAdmin ? { path: '/managment' } : { path: '/lost' }
         }
 
         if (privateTarget && !isAuthenticated) {
