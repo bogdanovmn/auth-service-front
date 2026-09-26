@@ -4,6 +4,7 @@ import { eventBus, Event } from '../common/event-bus'
 import { SsoService } from "@bogdanovmn/ssofw"
 import { authStore } from "../stores/auth"
 import { t } from "../i18n"
+import { tooManyAttemptsMessage } from "../common/api-error"
 
 
 const auth = authStore()
@@ -66,6 +67,8 @@ function handleRegistrationError(err: any) {
         alert.value = t('registration.emailExists')
     } else if (err?.response?.status === 400) {
         alert.value = t('registration.invalidData')
+    } else if (err?.response?.status === 429) {
+        alert.value = tooManyAttemptsMessage(err)
     } else if (err?.response?.status >= 500) {
         alert.value = t('registration.serverError')
     } else if (err?.code === 'NETWORK_ERROR' || !navigator.onLine) {

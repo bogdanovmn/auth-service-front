@@ -6,6 +6,7 @@
     import { authStore } from "../stores/auth"
     import router from '../router';
     import { t } from '../i18n';
+    import { tooManyAttemptsMessage } from '../common/api-error';
 
 
     const auth = authStore()
@@ -66,6 +67,8 @@
             error.value = t('login.invalidCredentials')
         } else if (err?.response?.status === 403) {
             error.value = t('login.accessDenied')
+        } else if (err?.response?.status === 429) {
+            error.value = tooManyAttemptsMessage(err)
         } else if (err?.response?.status >= 500) {
             error.value = t('login.serverError')
         } else if (err?.code === 'NETWORK_ERROR' || !navigator.onLine) {

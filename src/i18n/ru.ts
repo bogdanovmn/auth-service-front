@@ -6,6 +6,14 @@ function pluralRu(count: number, one: string, few: string, many: string): string
     return many;
 }
 
+function waitRu(seconds: number): string {
+    if (seconds < 60) {
+        return `${seconds} ${pluralRu(seconds, 'секунду', 'секунды', 'секунд')}`;
+    }
+    const minutes = Math.ceil(seconds / 60);
+    return `${minutes} ${pluralRu(minutes, 'минуту', 'минуты', 'минут')}`;
+}
+
 export default {
     nav: {
         brand: 'Единая Дверь',
@@ -19,6 +27,9 @@ export default {
     errors: {
         default: 'Произошла непредвиденная ошибка',
         permissionDenied: 'Отказано в доступе',
+        tooManyAttempts: (params: { seconds?: number }) => params.seconds
+            ? `Слишком много попыток входа. Повторите попытку через ${waitRu(params.seconds)}.`
+            : 'Слишком много попыток входа. Повторите попытку позже.',
     },
     error: {
         title: 'Упс! Что-то пошло не так',

@@ -1,3 +1,11 @@
+function waitEn(seconds: number): string {
+    if (seconds < 60) {
+        return `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`;
+    }
+    const minutes = Math.ceil(seconds / 60);
+    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
+}
+
 export default {
     nav: {
         brand: 'Single Sign-On',
@@ -11,6 +19,9 @@ export default {
     errors: {
         default: 'An unexpected error occurred',
         permissionDenied: 'Permission denied',
+        tooManyAttempts: (params: { seconds?: number }) => params.seconds
+            ? `Too many login attempts. Try again in ${waitEn(params.seconds)}.`
+            : 'Too many login attempts. Try again later.',
     },
     error: {
         title: 'Oops! Something went wrong',
