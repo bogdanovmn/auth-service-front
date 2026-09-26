@@ -17,11 +17,13 @@ export type AvailableService = {
     url: string;
 }
 
+export type UserStatus = 'CREATED' | 'ACTIVE' | 'INACTIVE'
+
 export type UserRecord = {
     id: string;
     name: string;
     email: string;
-    status: string;
+    status: UserStatus;
     createdAt: string;
     updatedAt: string;
 }
@@ -73,6 +75,10 @@ export type NewApplicationRequest = {
     roles: string[];
 }
 
+export type UpdateUserStatusRequest = {
+    status: UserStatus;
+}
+
 
 export class SsoResourcesService {
     private retryableClient: AuthHttpClient
@@ -122,6 +128,13 @@ export class SsoResourcesService {
     public createPasswordResetLink(userId: string): Promise<PasswordResetLink> {
         return this.retryableClient.post<PasswordResetLink>(
             `/users/${userId}/password-reset`
+        )
+    }
+
+    public updateUserStatus(userId: string, status: UserStatus): Promise<UserRecord> {
+        return this.retryableClient.put<UserRecord>(
+            `/users/${userId}/status`,
+            { status: status } as UpdateUserStatusRequest
         )
     }
 

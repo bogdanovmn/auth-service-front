@@ -1,19 +1,29 @@
 <script setup lang="ts">
     import { ref, inject } from 'vue'
     import { useRouter } from 'vue-router'
-    import { SsoResourcesService, UserRecord, PasswordResetLink } from '../common/sso-resources-service';
+    import { SsoResourcesService, UserRecord, UserStatus, PasswordResetLink } from '../common/sso-resources-service';
+    import { authStore } from '../stores/auth'
     import { t } from '../i18n'
     import AdminTabs from './AdminTabs.vue'
 
 
     const ssoResourceService = inject<SsoResourcesService>("ssoResourceService")!
     const router = useRouter()
+    const auth = authStore()
 
     const data = ref<UserRecord[]>()
     const alert = ref("")
     const creatingFor = ref<string | null>(null)
     const linkModal = ref<{ link: string, expiresAt: string } | null>(null)
     const linkCopied = ref(false)
+    const statusModal = ref<{ user: UserRecord, status: UserStatus } | null>(null)
+    const isSaving = ref(false)
+
+    const statusOptions: { value: UserStatus, label: string }[] = [
+        { value: 'CREATED', label: t('users.statusCreated') },
+        { value: 'ACTIVE', label: t('users.statusActive') },
+        { value: 'INACTIVE', label: t('users.statusInactive') }
+    ]
 
     ssoResourceService.users()
         .then(users => data.value = users)
@@ -51,6 +61,42 @@
         router.push(`/users/${user.id}/activity`)
     }
 
+    // the backend rejects a self status change, so don't even offer it
+    function isCurrentUser(user: UserRecord): boolean {
+        return !!auth.userId && auth.userId === user.id
+    }
+
+    function openStatusModal(user: UserRecord) {
+        alert.value = ""
+        statusModal.value = { user: user, status: user.status }
+    }
+
+    function closeStatusModal() {
+        if (isSaving.value) return
+        statusModal.value = null
+    }
+
+    function saveStatus() {
+        if (!statusModal.value) return
+        isSaving.value = true
+        alert.value = ""
+        ssoResourceService.updateUserStatus(statusModal.value.user.id, statusModal.value.status)
+            .then((updated: UserRecord) => {
+                if (data.value) {
+                    data.value = data.value.map(u => u.id === updated.id ? updated : u)
+                }
+                isSaving.value = false
+                statusModal.value = null
+            })
+            .catch(err => {
+                console.error('Update user status error:', err)
+                alert.value = t('users.statusUpdateFailed')
+            })
+            .finally(() => {
+                isSaving.value = false
+            })
+    }
+
     async function copyLink() {
         if (!linkModal.value) return
         try {
@@ -76,13 +122,11 @@
         return isNaN(date.getTime()) ? String(value) : date.toLocaleDateString()
     }
 
-    function statusLabel(status: string): string {
-        if (status === 'ACTIVE') return t('users.statusActive')
-        if (status === 'INACTIVE') return t('users.statusInactive')
-        return t('users.statusCreated')
+    function statusLabel(status: UserStatus): string {
+        return statusOptions.find(o => o.value === status)?.label ?? t('users.statusCreated')
     }
 
-    function statusClass(status: string): string {
+    function statusClass(status: UserStatus): string {
         if (status === 'ACTIVE') return 'status-active'
         if (status === 'INACTIVE') return 'status-inactive'
         return 'status-created'
@@ -167,6 +211,21 @@
                                 </button>
                                 <button
                                     class="icon-btn"
+                                    :title="isCurrentUser(user) ? t('users.statusSelfForbidden') : t('users.changeStatus')"
+                                    :aria-label="t('users.changeStatus')"
+                                    :disabled="isCurrentUser(user)"
+                                    @click="openStatusModal(user)"
+                                >
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <polyline points="22 11 18 11 16 13"/>
+                                        <path d="M16 7l2-2 2 2"/>
+                                        <path d="M20 5v6"/>
+                                    </svg>
+                                </button>
+                                <button
+                                    class="icon-btn"
                                     :title="t('users.generateLink')"
                                     :aria-label="t('users.generateLink')"
                                     :disabled="creatingFor === user.id"
@@ -216,6 +275,58 @@
                 </div>
 
                 <p class="link-expiry">{{ t('users.linkExpires', { expires: formatDate(linkModal.expiresAt) }) }}</p>
+            </div>
+        </div>
+
+        <div v-if="statusModal" class="modal-overlay" @click.self="closeStatusModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <polyline points="22 11 18 11 16 13"/>
+                            <path d="M16 7l2-2 2 2"/>
+                            <path d="M20 5v6"/>
+                        </svg>
+                    </div>
+                    <h3>{{ t('users.statusModalTitle') }}</h3>
+                    <p class="modal-subtitle">
+                        {{ t('users.statusModalText', { email: statusModal.user.email }) }}
+                    </p>
+                </div>
+
+                <form @submit.prevent="saveStatus">
+                    <div class="status-options">
+                        <label
+                            v-for="option in statusOptions"
+                            :key="option.value"
+                            class="status-option"
+                            :class="{ 'status-option-selected': statusModal.status === option.value }"
+                        >
+                            <input
+                                type="radio"
+                                name="user-status"
+                                :value="option.value"
+                                v-model="statusModal.status"
+                            />
+                            <span
+                                class="status-badge"
+                                :class="statusClass(option.value)"
+                            >{{ option.label }}</span>
+                        </label>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-primary btn-sm" :disabled="isSaving">
+                            <div v-if="isSaving" class="btn-loading"></div>
+                            <span v-else>{{ t('users.statusSave') }}</span>
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" :disabled="isSaving" @click="closeStatusModal">
+                            {{ t('users.close') }}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -480,6 +591,49 @@
     color: #6b7280;
     font-size: 0.8rem;
     margin: 1.25rem 0 0 0;
+}
+
+.status-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.status-option {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.status-option:hover {
+    border-color: rgba(102, 126, 234, 0.4);
+    background: rgba(102, 126, 234, 0.04);
+}
+
+.status-option-selected {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.08);
+}
+
+.status-option input {
+    accent-color: #667eea;
+    cursor: pointer;
+    margin: 0;
+}
+
+.btn-loading {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s ease-in-out infinite;
 }
 
 @media (max-width: 480px) {

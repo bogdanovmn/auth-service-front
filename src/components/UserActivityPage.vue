@@ -38,6 +38,7 @@
             case 'REFRESH': return t('activity.typeRefresh')
             case 'PASSWORD_CHANGED': return t('activity.typePasswordChanged')
             case 'LOGIN_FAILED': return t('activity.typeLoginFailed')
+            case 'STATUS_CHANGED': return t('activity.typeStatusChanged')
             default: return type
         }
     }
@@ -50,6 +51,7 @@
             case 'REFRESH': return 'ev-refresh'
             case 'PASSWORD_CHANGED': return 'ev-password'
             case 'LOGIN_FAILED': return 'ev-failed'
+            case 'STATUS_CHANGED': return 'ev-status'
             default: return 'ev-other'
         }
     }
@@ -285,6 +287,11 @@
 .ev-failed {
     background: rgba(239, 68, 68, 0.12);
     color: #b91c1c;
+}
+
+.ev-status {
+    background: rgba(245, 158, 11, 0.12);
+    color: #b45309;
 }
 
 .ev-other {
