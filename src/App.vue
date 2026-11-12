@@ -6,6 +6,7 @@
     import AuthState from './components/AuthState.vue'
     import LocaleSwitcher from './components/LocaleSwitcher.vue'
     import { authStore } from "./stores/auth"
+    import { redirectWithCode } from './common/oauth'
     import { t } from './i18n'
 
     const auth = authStore()
@@ -15,11 +16,8 @@
     
     eventBus.on(Event.login, () => {
         auth.update()
-        if (auth.redirectToAfterSuccessLogin) {
-            const redirectBackUrl = new URL(auth.redirectToAfterSuccessLogin!)
-            redirectBackUrl.searchParams.append('code', auth.codeToExchange!)
-            console.log(`redirectBackUrl: ${redirectBackUrl.toString()}`)
-            window.location.href = redirectBackUrl.toString()
+        if (auth.redirectToAfterSuccessLogin && auth.codeToExchange) {
+            redirectWithCode(auth.redirectToAfterSuccessLogin, auth.codeToExchange)
         } else {
             if (auth.isAdmin) {
                 router.push('/managment')

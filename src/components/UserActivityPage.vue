@@ -39,6 +39,7 @@
             case 'PASSWORD_CHANGED': return t('activity.typePasswordChanged')
             case 'LOGIN_FAILED': return t('activity.typeLoginFailed')
             case 'STATUS_CHANGED': return t('activity.typeStatusChanged')
+            case 'OAUTH_LOGIN': return t('activity.typeOauthLogin')
             default: return type
         }
     }
@@ -52,6 +53,7 @@
             case 'PASSWORD_CHANGED': return 'ev-password'
             case 'LOGIN_FAILED': return 'ev-failed'
             case 'STATUS_CHANGED': return 'ev-status'
+            case 'OAUTH_LOGIN': return 'ev-sso'
             default: return 'ev-other'
         }
     }

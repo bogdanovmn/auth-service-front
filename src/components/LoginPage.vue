@@ -7,6 +7,7 @@
     import router from '../router';
     import { t } from '../i18n';
     import { tooManyAttemptsMessage } from '../common/api-error';
+    import { startOAuthLogin, oauthErrorMessage, redirectWithCode, storedReturnUrl, OAuthProvider } from '../common/oauth';
 
 
     const auth = authStore()
@@ -14,24 +15,24 @@
 
     const email = ref("")
     const password = ref("")
-    auth.redirectToAfterSuccessLogin = useRoute().query.from?.toString() ?? null
-    const error = ref("")
+    const route = useRoute()
+    const oauthError = route.query.oauthError?.toString()
+    auth.redirectToAfterSuccessLogin = route.query.from?.toString()
+        ?? (oauthError ? storedReturnUrl() : null)
+    const error = ref(oauthError ? oauthErrorMessage(oauthError) : "")
     const isLoading = ref(false)
+
+    function loginWithProvider(provider: OAuthProvider) {
+        startOAuthLogin(provider, auth.redirectToAfterSuccessLogin)
+    }
 
     onMounted(() => {
         if (auth.redirectToAfterSuccessLogin && auth.isAuthenticated) {
             ssoService.exchangeJwtToCode()
-                .then(redirectWithCode)
+                .then(code => redirectWithCode(auth.redirectToAfterSuccessLogin!, code))
                 .catch(() => router.push("/login"))
         }
     });
-
-    function redirectWithCode(code: string) {
-        const redirectBackUrl = new URL(auth.redirectToAfterSuccessLogin!)
-        redirectBackUrl.searchParams.append('code', code)
-        console.log(`redirectBackUrl: ${redirectBackUrl.toString()}`)
-        window.location.href = redirectBackUrl.toString()
-    }
 
     function loginRequest() {
         error.value = ""
@@ -39,7 +40,7 @@
 
         if (auth.redirectToAfterSuccessLogin) {
             ssoService.exchangeCredentialsToCode(email.value, password.value)
-                .then(redirectWithCode)
+                .then(code => redirectWithCode(auth.redirectToAfterSuccessLogin!, code))
                 .catch(err => {
                     handleLoginError(err)
                 })
@@ -167,6 +168,22 @@
                 </button>
             </form>
 
+            <div class="social-login">
+                <div class="social-divider"><span>{{ t('login.socialDivider') }}</span></div>
+                <div class="social-buttons">
+                    <button type="button" class="btn btn-secondary social-btn" @click="loginWithProvider('github')">
+                        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                        </svg>
+                        {{ t('login.continueWithGithub') }}
+                    </button>
+                    <button type="button" class="btn btn-secondary social-btn" @click="loginWithProvider('vk')">
+                        <span class="social-icon-vk" aria-hidden="true">VK</span>
+                        {{ t('login.continueWithVk') }}
+                    </button>
+                </div>
+            </div>
+
             <div class="login-footer">
                 <p>{{ t('login.noAccount') }} 
                     <router-link to="/registration" class="link">{{ t('login.createOne') }}</router-link>
@@ -244,6 +261,48 @@
 .login-footer p {
     color: #6b7280;
     margin: 0;
+}
+
+/* External providers */
+.social-login {
+    margin-bottom: 2rem;
+}
+
+.social-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0 1rem;
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+.social-divider::before,
+.social-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e5e7eb;
+}
+
+.social-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.social-btn {
+    width: 100%;
+}
+
+.social-icon-vk {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    font-weight: 800;
+    font-size: 0.875rem;
+    color: #0077ff;
 }
 
 .link {

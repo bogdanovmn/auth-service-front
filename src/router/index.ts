@@ -7,6 +7,7 @@ import UsersPage from './../components/UsersPage.vue'
 import UserActivityPage from './../components/UserActivityPage.vue'
 import LoginAttemptsPage from './../components/LoginAttemptsPage.vue'
 import PasswordResetPage from './../components/PasswordResetPage.vue'
+import OAuthCallbackPage from './../components/OAuthCallbackPage.vue'
 import ErrorPage from './../components/ErrorPage.vue'
 import LostPage from './../components/LostPage.vue'
 
@@ -21,6 +22,7 @@ const router = createRouter({
         { path: "/login",        component: LoginPage },
         { path: "/registration", component: RegistrationPage },
         { path: "/password-reset", component: PasswordResetPage },
+        { path: "/oauth2/callback", component: OAuthCallbackPage },
         { path: "/managment",    component: ManagmentPage, meta: { allow: Role.admin } },
         { path: "/users",        component: UsersPage, meta: { allow: Role.admin } },
         { path: "/users/:id/activity", component: UserActivityPage, meta: { allow: Role.admin } },
