@@ -1,10 +1,26 @@
+import axios from 'axios'
 import { t } from '../i18n'
 import { apiBaseUrl } from './api-base'
 
-export type OAuthProvider = 'github' | 'vk'
+export type OAuthProvider = 'github' | 'vk' | 'yandex'
+
+const OAUTH_PROVIDERS: readonly string[] = ['github', 'vk', 'yandex']
 
 const RETURN_URL_KEY = 'oauth.return-url'
 const PROVIDER_KEY = 'oauth.provider'
+
+export function fetchEnabledProviders(): Promise<OAuthProvider[]> {
+    return axios.get<string[]>(`${apiBaseUrl()}/oauth2/providers`)
+        .then(response => (response.data ?? []).filter(isOAuthProvider))
+        .catch(error => {
+            console.warn('Failed to load OAuth providers:', error)
+            return []
+        })
+}
+
+function isOAuthProvider(value: unknown): value is OAuthProvider {
+    return typeof value === 'string' && OAUTH_PROVIDERS.includes(value)
+}
 
 export function startOAuthLogin(provider: OAuthProvider, from: string | null | undefined): void {
     rememberReturnUrl(from)

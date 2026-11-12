@@ -52,6 +52,7 @@ export default {
         socialDivider: 'or',
         continueWithGithub: 'Sign in with GitHub',
         continueWithVk: 'Sign in with VK',
+        continueWithYandex: 'Sign in with Yandex ID',
         oauthAccessDenied: 'Sign-in via the external service was cancelled.',
         oauthEmailRequired: 'The external service did not provide an email. Allow access to your email or use another sign-in method.',
         oauthInvalidState: 'The sign-in link has expired. Please try again.',
@@ -86,6 +87,7 @@ export default {
         socialDivider: 'or',
         continueWithGithub: 'Sign up with GitHub',
         continueWithVk: 'Sign up with VK',
+        continueWithYandex: 'Sign up with Yandex ID',
     },
     oauthCallback: {
         processing: 'Finishing sign-in...',

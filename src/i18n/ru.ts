@@ -60,6 +60,7 @@ export default {
         socialDivider: 'или',
         continueWithGithub: 'Войти через GitHub',
         continueWithVk: 'Войти через VK',
+        continueWithYandex: 'Войти через Yandex ID',
         oauthAccessDenied: 'Вход через внешний сервис отменён.',
         oauthEmailRequired: 'Внешний сервис не передал email. Разрешите доступ к email или войдите другим способом.',
         oauthInvalidState: 'Ссылка для входа устарела. Попробуйте ещё раз.',
@@ -94,6 +95,7 @@ export default {
         socialDivider: 'или',
         continueWithGithub: 'Зарегистрироваться через GitHub',
         continueWithVk: 'Зарегистрироваться через VK',
+        continueWithYandex: 'Зарегистрироваться через Yandex ID',
     },
     oauthCallback: {
         processing: 'Завершаем вход...',

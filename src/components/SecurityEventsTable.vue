@@ -60,6 +60,7 @@
         switch (event.provider) {
             case 'github': return 'GitHub'
             case 'vk': return 'VK'
+            case 'yandex': return 'Yandex ID'
             default: break
         }
         switch (event.type) {
