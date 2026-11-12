@@ -2,6 +2,7 @@
     import { ref, inject } from 'vue'
     import { useRouter } from 'vue-router'
     import { SsoResourcesService, UserRecord, UserStatus, PasswordResetLink } from '../common/sso-resources-service';
+    import { formatDateTime } from '../common/date-format';
     import { authStore } from '../stores/auth'
     import { t } from '../i18n'
     import AdminTabs from './AdminTabs.vue'
@@ -112,16 +113,6 @@
         linkModal.value = null
     }
 
-    function formatDate(value: string): string {
-        const date = new Date(value)
-        return isNaN(date.getTime()) ? String(value) : date.toLocaleString()
-    }
-
-    function formatShortDate(value: string): string {
-        const date = new Date(value)
-        return isNaN(date.getTime()) ? String(value) : date.toLocaleDateString()
-    }
-
     function statusLabel(status: UserStatus): string {
         return statusOptions.find(o => o.value === status)?.label ?? t('users.statusCreated')
     }
@@ -191,12 +182,10 @@
                                 <span class="user-email">{{ user.email }}</span>
                             </td>
                             <td class="cell-created" :data-label="t('users.createdAt')">
-                                <span class="date-full">{{ formatDate(user.createdAt) }}</span>
-                                <span class="date-short">{{ formatShortDate(user.createdAt) }}</span>
+                                {{ formatDateTime(user.createdAt) }}
                             </td>
                             <td class="cell-updated" :data-label="t('users.updatedAt')">
-                                <span class="date-full">{{ formatDate(user.updatedAt) }}</span>
-                                <span class="date-short">{{ formatShortDate(user.updatedAt) }}</span>
+                                {{ formatDateTime(user.updatedAt) }}
                             </td>
                             <td class="cell-actions">
                                 <button
@@ -274,7 +263,7 @@
                     <button class="btn btn-secondary btn-sm" @click="closeModal">{{ t('users.close') }}</button>
                 </div>
 
-                <p class="link-expiry">{{ t('users.linkExpires', { expires: formatDate(linkModal.expiresAt) }) }}</p>
+                <p class="link-expiry">{{ t('users.linkExpires', { expires: formatDateTime(linkModal.expiresAt) }) }}</p>
             </div>
         </div>
 
@@ -406,14 +395,14 @@
 
 .cell-name {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
     min-width: 0;
 }
 
 .user-name {
-    flex: 1 1 auto;
-    min-width: 0;
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -437,22 +426,20 @@
     font-size: 0.875rem;
 }
 
-.date-short {
-    display: none;
-}
-
-.actions-col,
-.cell-actions {
-    text-align: center;
+.actions-col {
+    text-align: right;
     white-space: nowrap;
     width: 1%;
+    padding-left: 2rem;
 }
 
 .cell-actions {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 0.5rem;
+    padding-left: 2rem;
+    white-space: nowrap;
 }
 
 .status-badge {
@@ -485,14 +472,21 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex: 0 0 40px;
     width: 40px;
     height: 40px;
+    padding: 0;
     border: none;
-    border-radius: 10px;
+    border-radius: 50%;
     background: rgba(102, 126, 234, 0.1);
     color: #667eea;
     cursor: pointer;
     transition: all 0.2s ease;
+}
+
+.icon-btn svg {
+    display: block;
+    flex: 0 0 auto;
 }
 
 .icon-btn:hover:not(:disabled) {
@@ -682,8 +676,9 @@
 
     .users-table td.cell-name {
         display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
         flex: 1 1 auto;
         min-width: 0;
         order: 1;
@@ -694,6 +689,7 @@
         width: auto;
         order: 2;
         margin-left: auto;
+        padding-left: 0;
     }
 
     .users-table td.cell-actions {
@@ -711,9 +707,10 @@
     }
 
     .cell-actions .icon-btn {
-        width: 28px;
-        height: 28px;
-        border-radius: 8px;
+        flex: 0 0 30px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
     }
 
     .cell-actions .icon-btn svg {
@@ -763,12 +760,5 @@
         color: #9ca3af;
     }
 
-    .date-full {
-        display: none;
-    }
-
-    .date-short {
-        display: inline;
-    }
 }
 </style>

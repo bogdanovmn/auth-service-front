@@ -3,7 +3,8 @@
     import { useRoute } from 'vue-router'
     import { SsoService } from '@bogdanovmn/ssofw'
     import { eventBus, Event } from '../common/event-bus'
-    import { redirectWithCode, takeReturnUrl } from '../common/oauth'
+    import { redirectWithCode, takeOAuthProvider, takeReturnUrl } from '../common/oauth'
+    import { exchangeJwtToCode } from '../common/sso'
     import { t } from '../i18n'
 
     const ssoService = inject<SsoService>("ssoService")!
@@ -22,12 +23,13 @@
 
         ssoService.exchangeCodeToJwt(code)
             .then(() => {
+                const provider = takeOAuthProvider()
                 const returnUrl = takeReturnUrl()
                 if (!returnUrl) {
                     eventBus.emit(Event.login)
                     return
                 }
-                return ssoService.exchangeJwtToCode()
+                return exchangeJwtToCode(returnUrl, provider)
                     .then(temporaryCode => redirectWithCode(returnUrl, temporaryCode))
             })
             .catch(() => {

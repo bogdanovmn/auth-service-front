@@ -1,20 +1,21 @@
 import { t } from '../i18n'
+import { apiBaseUrl } from './api-base'
 
 export type OAuthProvider = 'github' | 'vk'
 
 const RETURN_URL_KEY = 'oauth.return-url'
-
-function apiBaseUrl(): string {
-    const base = (import.meta.env.VITE_SSO_SERVICE_URL as string | undefined) ?? ''
-    return base.endsWith('/') ? base.slice(0, -1) : base
-}
+const PROVIDER_KEY = 'oauth.provider'
 
 export function startOAuthLogin(provider: OAuthProvider, from: string | null | undefined): void {
     rememberReturnUrl(from)
+    sessionStorage.setItem(PROVIDER_KEY, provider)
     const url = new URL(
         `${apiBaseUrl()}/oauth2/authorization/${provider}`,
         window.location.origin
     )
+    if (from) {
+        url.searchParams.set('clientUrl', from)
+    }
     window.location.href = url.toString()
 }
 
@@ -45,8 +46,15 @@ export function takeReturnUrl(): string | null {
     return url
 }
 
+export function takeOAuthProvider(): string | null {
+    const provider = sessionStorage.getItem(PROVIDER_KEY)
+    sessionStorage.removeItem(PROVIDER_KEY)
+    return provider
+}
+
 export function redirectWithCode(url: string, code: string): void {
     sessionStorage.removeItem(RETURN_URL_KEY)
+    sessionStorage.removeItem(PROVIDER_KEY)
     const target = new URL(url)
     target.searchParams.append('code', code)
     window.location.href = target.toString()

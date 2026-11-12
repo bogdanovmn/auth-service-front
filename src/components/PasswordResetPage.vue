@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { ref, inject } from 'vue'
+    import { ref, inject, watch } from 'vue'
     import { useRoute } from 'vue-router'
     import { tokenStorage } from "@bogdanovmn/ssofw"
     import router from '../router'
@@ -15,6 +15,16 @@
     const password = ref("")
     const passwordCheck = ref("")
     const alert = ref("")
+    // Keep the alert in the layout after the first error. Removing it shifts the
+    // form under the cursor between mousedown and mouseup, which swallows clicks.
+    const alertShown = ref(false)
+    const lastAlert = ref("")
+    watch(alert, value => {
+        if (value) {
+            alertShown.value = true
+            lastAlert.value = value
+        }
+    })
     const isLoading = ref(false)
     const isSuccess = ref(false)
 
@@ -117,13 +127,18 @@
                     </div>
                 </div>
 
-                <div v-if="alert" class="alert alert-error">
+                <div
+                    v-if="alertShown"
+                    class="alert alert-error"
+                    :class="{ 'alert-hidden': !alert }"
+                    :aria-hidden="!alert"
+                >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"/>
                         <line x1="15" y1="9" x2="9" y2="15"/>
                         <line x1="9" y1="9" x2="15" y2="15"/>
                     </svg>
-                    {{ alert }}
+                    {{ lastAlert }}
                 </div>
 
                 <form @submit.prevent="changePassword" class="reset-form">
@@ -283,6 +298,10 @@
 
 .reset-state .btn {
     margin-top: 1rem;
+}
+
+.alert-hidden {
+    visibility: hidden;
 }
 
 .reset-btn:disabled {

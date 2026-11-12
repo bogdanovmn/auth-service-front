@@ -34,13 +34,20 @@ export type PasswordResetLink = {
     ttlInMinutes: number;
 }
 
-export type UserActivityEvent = {
+export type SecurityEvent = {
     id: string;
     type: string;
     ip: string | null;
     userAgent: string | null;
+    clientUrl: string | null;
+    provider: string | null;
     createdAt: string;
+    accountId?: string;
+    accountName?: string;
+    accountEmail?: string;
 }
+
+export type UserActivityEvent = SecurityEvent
 
 export type UserActivity = {
     account: {
@@ -48,7 +55,7 @@ export type UserActivity = {
         name: string;
         email: string;
     }
-    events: UserActivityEvent[]
+    events: SecurityEvent[]
 }
 
 export type LoginAttempt = {
@@ -141,6 +148,12 @@ export class SsoResourcesService {
     public userActivity(userId: string): Promise<UserActivity> {
         return this.retryableClient.get<UserActivity>(
             `/users/${userId}/activity`
+        )
+    }
+
+    public allEvents(): Promise<SecurityEvent[]> {
+        return this.retryableClient.get<SecurityEvent[]>(
+            '/events'
         )
     }
 

@@ -5,6 +5,7 @@ import LoginPage from '../components/LoginPage.vue'
 import ManagmentPage from './../components/ManagementPage.vue'
 import UsersPage from './../components/UsersPage.vue'
 import UserActivityPage from './../components/UserActivityPage.vue'
+import AllEventsPage from './../components/AllEventsPage.vue'
 import LoginAttemptsPage from './../components/LoginAttemptsPage.vue'
 import PasswordResetPage from './../components/PasswordResetPage.vue'
 import OAuthCallbackPage from './../components/OAuthCallbackPage.vue'
@@ -26,6 +27,7 @@ const router = createRouter({
         { path: "/managment",    component: ManagmentPage, meta: { allow: Role.admin } },
         { path: "/users",        component: UsersPage, meta: { allow: Role.admin } },
         { path: "/users/:id/activity", component: UserActivityPage, meta: { allow: Role.admin } },
+        { path: "/events",        component: AllEventsPage, meta: { allow: Role.admin } },
         { path: "/login-attempts", component: LoginAttemptsPage, meta: { allow: Role.admin } },
         { path: "/logout",       component: LoginPage, meta: { private: true } },
         { path: "/lost",        component: LostPage, meta: { private: true } },

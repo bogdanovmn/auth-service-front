@@ -1,6 +1,7 @@
 <script setup lang="ts">
     import { ref, inject } from 'vue'
     import { SsoResourcesService, LoginAttempt } from '../common/sso-resources-service';
+    import { formatDateTime } from '../common/date-format';
     import { t } from '../i18n'
     import AdminTabs from './AdminTabs.vue'
 
@@ -17,16 +18,6 @@
             data.value = []
             alert.value = t('loginAttempts.loadFailed')
         })
-
-    function formatDate(value: string): string {
-        const date = new Date(value)
-        return isNaN(date.getTime()) ? String(value) : date.toLocaleString()
-    }
-
-    function formatShortDate(value: string): string {
-        const date = new Date(value)
-        return isNaN(date.getTime()) ? String(value) : date.toLocaleDateString()
-    }
 
     function display(value: string | null): string {
         return value && value.trim() !== '' ? value : t('loginAttempts.unknown')
@@ -92,8 +83,7 @@
                                 <span class="attempt-badge">{{ t('loginAttempts.badge') }}</span>
                             </td>
                             <td class="cell-time" :data-label="t('loginAttempts.when')">
-                                <span class="date-full">{{ formatDate(attempt.createdAt) }}</span>
-                                <span class="date-short">{{ formatShortDate(attempt.createdAt) }}</span>
+                                {{ formatDateTime(attempt.createdAt) }}
                             </td>
                             <td class="cell-ip" :data-label="t('loginAttempts.ip')">{{ display(attempt.ip) }}</td>
                             <td class="cell-browser" :data-label="t('loginAttempts.browser')">{{ display(attempt.userAgent) }}</td>
@@ -240,10 +230,6 @@
     white-space: nowrap;
 }
 
-.date-short {
-    display: none;
-}
-
 @media (max-width: 768px) {
     .table-wrap {
         overflow: visible;
@@ -322,14 +308,6 @@
 
     .cell-ip {
         font-family: inherit;
-    }
-
-    .date-full {
-        display: none;
-    }
-
-    .date-short {
-        display: inline;
     }
 
     .attempt-badge {

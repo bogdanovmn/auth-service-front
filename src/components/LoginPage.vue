@@ -1,5 +1,5 @@
 <script setup lang="ts">
-    import { inject, onMounted, ref } from 'vue';
+    import { inject, onMounted, ref, watch } from 'vue';
     import { eventBus, Event } from '../common/event-bus';
     import { SsoService } from "@bogdanovmn/ssofw"
     import { useRoute } from 'vue-router';
@@ -8,6 +8,7 @@
     import { t } from '../i18n';
     import { tooManyAttemptsMessage } from '../common/api-error';
     import { startOAuthLogin, oauthErrorMessage, redirectWithCode, storedReturnUrl, OAuthProvider } from '../common/oauth';
+    import { exchangeCredentialsToCode, exchangeJwtToCode } from '../common/sso';
 
 
     const auth = authStore()
@@ -20,6 +21,16 @@
     auth.redirectToAfterSuccessLogin = route.query.from?.toString()
         ?? (oauthError ? storedReturnUrl() : null)
     const error = ref(oauthError ? oauthErrorMessage(oauthError) : "")
+    // Keep the alert in the layout after the first error. Removing it shifts the
+    // form under the cursor between mousedown and mouseup, which swallows clicks.
+    const errorShown = ref(!!error.value)
+    const lastError = ref(error.value)
+    watch(error, value => {
+        if (value) {
+            errorShown.value = true
+            lastError.value = value
+        }
+    })
     const isLoading = ref(false)
 
     function loginWithProvider(provider: OAuthProvider) {
@@ -28,7 +39,7 @@
 
     onMounted(() => {
         if (auth.redirectToAfterSuccessLogin && auth.isAuthenticated) {
-            ssoService.exchangeJwtToCode()
+            exchangeJwtToCode(auth.redirectToAfterSuccessLogin, null)
                 .then(code => redirectWithCode(auth.redirectToAfterSuccessLogin!, code))
                 .catch(() => router.push("/login"))
         }
@@ -39,7 +50,7 @@
         isLoading.value = true
 
         if (auth.redirectToAfterSuccessLogin) {
-            ssoService.exchangeCredentialsToCode(email.value, password.value)
+            exchangeCredentialsToCode(email.value, password.value, auth.redirectToAfterSuccessLogin)
                 .then(code => redirectWithCode(auth.redirectToAfterSuccessLogin!, code))
                 .catch(err => {
                     handleLoginError(err)
@@ -106,13 +117,18 @@
                 </div>
             </div>
 
-            <div v-if="error" class="alert alert-error">
+            <div
+                v-if="errorShown"
+                class="alert alert-error"
+                :class="{ 'alert-hidden': !error }"
+                :aria-hidden="!error"
+            >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"/>
                     <line x1="15" y1="9" x2="9" y2="15"/>
                     <line x1="9" y1="9" x2="15" y2="15"/>
                 </svg>
-                {{ error }}
+                {{ lastError }}
             </div>
 
             <form @submit.prevent="loginRequest" class="login-form">
@@ -315,6 +331,10 @@
 .link:hover {
     color: #5a67d8;
     text-decoration: underline;
+}
+
+.alert-hidden {
+    visibility: hidden;
 }
 
 /* Loading state */
